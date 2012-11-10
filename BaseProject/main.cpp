@@ -5,20 +5,38 @@
 using namespace std;
 using namespace boost;
 
-void new_client(int socket, string addr)
+void new_client()
 {
-    cout << socket << " " << addr << endl;
-}
-
-void funkcja(Addr adr)
-{
-    cout << adr.getIP() << " : " << adr.getPort() << endl;
+    Conection klient;
+    klient.initByAddr(Addr("localhost",6668));
+    write(klient,"qweocdkb",8);
+    klient.disconnect();
 }
 
 int main()
 {
-    thread t1(new_client,10,"net.com");
-    cout << "Hello world!" << endl;
+
+
+    Host serwer;
+    if(!serwer.initByAddr(Addr(6668)))
+        {exit(0);}
+
+    thread t1(new_client);
+
+    Conection nowy=serwer.waitForClient();
+
+    if(!nowy.isActive())
+        {exit(0);}
+
     t1.join();
+
+    char buf[6];
+    buf[5]=0;
+
+    cout << read(nowy,buf,5) << ": " << buf << endl;
+    cout << read(nowy,buf,5) << ": " << buf << endl;
+
+    nowy.disconnect();
+    serwer.disconnect();
     return 0;
 }

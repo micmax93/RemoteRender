@@ -16,6 +16,15 @@ class Addr
     struct sockaddr_in addr;
     socklen_t addrlen;
 
+    void assignPointers()
+    {
+        sockaddr_in_ptr=(&addr);
+        sockaddr_ptr=(struct sockaddr*)(&addr);
+        in_addr_ptr=(&addr.sin_addr);
+        s_addr_ptr=(&addr.sin_addr.s_addr);
+        addrlen_ptr=(&addrlen);
+    }
+
 public:
 
     struct sockaddr_in *sockaddr_in_ptr;
@@ -26,26 +35,32 @@ public:
 
     Addr()
     {
-        sockaddr_in_ptr=(&addr);
-        sockaddr_ptr=(struct sockaddr*)(&addr);
-        in_addr_ptr=(&addr.sin_addr);
-        s_addr_ptr=(&addr.sin_addr.s_addr);
-        addrlen_ptr=(&addrlen);
-
         addr.sin_family=AF_INET;
         addrlen=sizeof(addr);
+        assignPointers();
+    }
+
+    Addr(string name,int port)
+    {
+        addr.sin_family=AF_INET;
+        addrlen=sizeof(addr);
+        assignPointers();
+        initByName(name,port);
+    }
+
+    Addr(int port)
+    {
+        addr.sin_family=AF_INET;
+        addrlen=sizeof(addr);
+        assignPointers();
+        initHost(port);
     }
 
     Addr(const Addr &copy)
     {
         addr=*copy.sockaddr_in_ptr;
         addrlen=*copy.addrlen_ptr;
-
-        sockaddr_in_ptr=(&addr);
-        sockaddr_ptr=(struct sockaddr*)(&addr);
-        in_addr_ptr=(&addr.sin_addr);
-        s_addr_ptr=(&addr.sin_addr.s_addr);
-        addrlen_ptr=(&addrlen);
+        assignPointers();
     }
 
     Addr& operator=(Addr &copy)
@@ -141,6 +156,11 @@ public:
         active=false;
     }
 
+    operator int()
+    {
+        return my_socket;
+    }
+
     void disconnect()
     {
         if(active)
@@ -166,6 +186,16 @@ public:
     int getSocket()
     {
         return my_socket;
+    }
+
+    int getPort()
+    {
+        return addr.getPort();
+    }
+
+    string getIP()
+    {
+        return addr.getIP();
     }
 
     bool isActive()
