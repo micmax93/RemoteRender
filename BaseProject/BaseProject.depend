@@ -1,0 +1,18 @@
+# depslib dependency file v1.0
+1352548820 source:/home/micmax93/Pobrane/threads/main.cpp
+	<iostream>
+	<vector>
+	<boost/thread.hpp>
+	"klasy.hpp"
+
+1352549748 /home/micmax93/Pobrane/threads/klasy.hpp
+	<stdio.h>
+	<sys/socket.h>
+	<netinet/in.h>
+	<stdlib.h>
+	<unistd.h>
+	<arpa/inet.h>
+	<netdb.h>
+	<time.h>
+	<ctype.h>
+
