@@ -5,11 +5,18 @@
 using namespace std;
 using namespace boost;
 
-void new_client()
+void new_client(Connection klient)
 {
-    Connection klient;
-    klient.initByAddr(Addr("localhost",6668));
-    write(klient,"qweocdkb",8);
+    char buf[51];
+    buf[50]=0;
+    while(read(klient,buf,50))
+    {
+        printf("%i: %s",(int)klient,buf);
+        for(int i=0;i<50;i++)
+        {
+            buf[i]=0;
+        }
+    }
     klient.disconnect();
 }
 
@@ -17,26 +24,16 @@ int main()
 {
 
 
-    Host serwer;
-    if(!serwer.initByAddr(Addr(6668)))
-        {exit(0);}
+    Host host;
+    if(!host.initByAddr(Addr(6668)))
+    {
+        printf("Could not inialize host connection.\n");
+        exit(0);
+    }
 
-    thread t1(new_client);
+    Server reader(host,new_client);
+    reader.start();
 
-    Connection nowy=serwer.waitForClient();
-
-    if(!nowy.isActive())
-        {exit(0);}
-
-    t1.join();
-
-    char buf[6];
-    buf[5]=0;
-
-    cout << read(nowy,buf,5) << ": " << buf << endl;
-    cout << read(nowy,buf,5) << ": " << buf << endl;
-
-    nowy.disconnect();
-    serwer.disconnect();
+    host.disconnect();
     return 0;
 }
