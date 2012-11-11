@@ -217,6 +217,9 @@ class Host: public Connection
             return false;
         }
 
+        int optval=1;
+        setsockopt(my_socket,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(optval));
+
         int status;
         status=bind(my_socket,addr.sockaddr_ptr,*addr.addrlen_ptr);
         if(status<0)
