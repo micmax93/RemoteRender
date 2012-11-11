@@ -1,0 +1,7 @@
+#Code::Blocks project files
+*.cbp
+*.layout
+*.depend
+bin
+obj
+
