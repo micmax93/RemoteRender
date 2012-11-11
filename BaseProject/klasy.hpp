@@ -10,6 +10,7 @@
 #include <time.h>
 #include <ctype.h>
 using namespace std;
+using namespace boost;
 
 class Addr
 {
@@ -250,6 +251,42 @@ class Host: public Conection
     }
 };
 
+class Server
+{
+    Host connection;
+    void *client_handler;
+    thread_group clients;
+    bool active;
 
+    public:
+
+    Server(Host host,void *client_handler)
+    {
+        conection=host;
+        this->client_handler=client_handler;
+        active=false;
+    }
+
+    bool isActive()
+    {
+        return active;
+    }
+
+    void start()
+    {
+        active=true;
+        while(active and connection.isActive())
+        {
+            Connection newClient;
+            newClient=connection.waitForClient();
+            clients.create_thread(client_handler,newClient);
+        }
+    }
+
+    void stop()
+    {
+        active=false;
+    }
+};
 
 #endif // KLASY_HPP_INCLUDED
