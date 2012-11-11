@@ -10,7 +10,7 @@
 #include <time.h>
 #include <ctype.h>
 using namespace std;
-using namespace boost;
+//using namespace boost;
 
 class Addr
 {
@@ -123,7 +123,7 @@ struct transmition_info
     unsigned long long data_size; ///rozmiar danych
 };
 
-class Conection
+class Connection
 {
     protected:
     int my_socket;
@@ -152,7 +152,7 @@ class Conection
 
 public:
 
-    Conection()
+    Connection()
     {
         active=false;
     }
@@ -205,7 +205,7 @@ public:
     }
 };
 
-class Host: public Conection
+class Host: public Connection
 {
     protected:
     virtual bool init()
@@ -237,10 +237,10 @@ class Host: public Conection
     }
 
     public:
-    Conection waitForClient()
+    Connection waitForClient()
     {
         Addr new_addr;
-        Conection client;
+        Connection client;
         int new_sock;
         new_sock=accept(my_socket, new_addr.sockaddr_ptr, new_addr.addrlen_ptr);
         if(new_sock>0)
@@ -254,15 +254,15 @@ class Host: public Conection
 class Server
 {
     Host connection;
-    void *client_handler;
-    thread_group clients;
+    void (*client_handler)(Connection);
+    boost::thread_group clients;
     bool active;
 
     public:
 
-    Server(Host host,void *client_handler)
+    Server(Host host,void (*client_handler)(Connection))
     {
-        conection=host;
+        connection=host;
         this->client_handler=client_handler;
         active=false;
     }
@@ -277,9 +277,8 @@ class Server
         active=true;
         while(active and connection.isActive())
         {
-            Connection newClient;
-            newClient=connection.waitForClient();
-            clients.create_thread(client_handler,newClient);
+            Connection newClient=connection.waitForClient();
+            clients.add_thread(new boost::thread(client_handler,newClient));
         }
     }
 

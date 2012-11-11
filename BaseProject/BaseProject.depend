@@ -16,13 +16,13 @@
 	<time.h>
 	<ctype.h>
 
-1352557767 source:/home/micmax93/git/RemoteRender/BaseProject/main.cpp
+1352642861 source:/home/micmax93/git/RemoteRender/BaseProject/main.cpp
 	<iostream>
 	<vector>
 	<boost/thread.hpp>
 	"klasy.hpp"
 
-1352558501 /home/micmax93/git/RemoteRender/BaseProject/klasy.hpp
+1352643003 /home/micmax93/git/RemoteRender/BaseProject/klasy.hpp
 	<stdio.h>
 	<sys/socket.h>
 	<netinet/in.h>

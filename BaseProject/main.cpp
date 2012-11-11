@@ -7,7 +7,7 @@ using namespace boost;
 
 void new_client()
 {
-    Conection klient;
+    Connection klient;
     klient.initByAddr(Addr("localhost",6668));
     write(klient,"qweocdkb",8);
     klient.disconnect();
@@ -23,7 +23,7 @@ int main()
 
     thread t1(new_client);
 
-    Conection nowy=serwer.waitForClient();
+    Connection nowy=serwer.waitForClient();
 
     if(!nowy.isActive())
         {exit(0);}
