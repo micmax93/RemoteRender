@@ -1,5 +1,5 @@
-#ifndef KLASY_HPP_INCLUDED
-#define KLASY_HPP_INCLUDED
+#ifndef CONNECTIVITY_HPP_INCLUDED
+#define CONNECTIVITY_HPP_INCLUDED
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,7 +10,6 @@
 #include <time.h>
 #include <ctype.h>
 using namespace std;
-//using namespace boost;
 
 class Addr
 {
