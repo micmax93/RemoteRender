@@ -254,41 +254,4 @@ class Host: public Connection
     }
 };
 
-class Server
-{
-    Host connection;
-    void (*client_handler)(Connection);
-    boost::thread_group clients;
-    bool active;
-
-    public:
-
-    Server(Host host,void (*client_handler)(Connection))
-    {
-        connection=host;
-        this->client_handler=client_handler;
-        active=false;
-    }
-
-    bool isActive()
-    {
-        return active;
-    }
-
-    void start()
-    {
-        active=true;
-        while(active and connection.isActive())
-        {
-            Connection newClient=connection.waitForClient();
-            clients.add_thread(new boost::thread(client_handler,newClient));
-        }
-    }
-
-    void stop()
-    {
-        active=false;
-    }
-};
-
 #endif // KLASY_HPP_INCLUDED

@@ -26,14 +26,14 @@ void initServerConection(int argc, char **argv)
         printf("Could not inialize host connection.\n");
         exit(0);
     }
+    active=true;
 }
 
 void serverMainLoop(void (*client_handler)(Connection))
 {
-    active=true;
-    while(active and connection.isActive())
+    while(active and host.isActive())
     {
-        Connection newClient=connection.waitForClient();
+        Connection newClient=host.waitForClient();
         clients.add_thread(new boost::thread(client_handler,newClient));
     }
 }
@@ -42,12 +42,12 @@ void consoleHandler()
 {
     while(active)
     {
-        char c;
-        cin >> c;
+        char c=0;
+        scanf("%c",&c);
         if(c=='q')
         {
             active=false;
-            //host.disconnect();
+            write(host,"q",1);
         }
     }
 }
@@ -64,6 +64,5 @@ int main(int argc, char **argv)
     boost::thread serwer(serverMainLoop,new_client);
     consoleHandler();
     serwer.join();
-    host.disconnect();
     return 0;
 }
