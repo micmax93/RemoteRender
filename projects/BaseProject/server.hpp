@@ -1,49 +1,6 @@
 #ifndef SERVER_HPP_INCLUDED
 #define SERVER_HPP_INCLUDED
 
-class Semaphore
-{
-    int count;
-    boost::mutex outer_mx;
-    boost::mutex  inner_mx;
-
-    public:
-
-    Semaphore()
-    {
-        count=0;
-        inner_mx.lock();
-    }
-
-    void get()
-    {
-        outer_mx.lock();
-        if(count>0)
-        {
-            count--;
-
-            if(count>0)
-                {inner_mx.unlock();}
-
-            outer_mx.unlock();
-        }
-        else
-        {
-            outer_mx.unlock();
-            inner_mx.lock();
-            get();
-        }
-    }
-
-    void add(int n=1)
-    {
-        outer_mx.lock();
-        count+=n;
-        inner_mx.unlock();
-        outer_mx.unlock();
-    }
-};
-
 namespace server
 {
     Host host;
