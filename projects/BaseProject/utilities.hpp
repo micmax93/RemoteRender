@@ -142,6 +142,16 @@ class RoundTasksQueue
     }
 };
 
+template <class X>
+class TaskContainer
+{
+	public:
+	int owner;
+	string hash;
+	
+	ResultQueue *models;
+	X task;
+};
 
 
 #endif // UTILITIES_HPP_INCLUDED
