@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <boost/thread.hpp>
+#include "utilities.hpp"
 #include "connectivity.hpp"
 #include "server.hpp"
 using namespace std;
@@ -8,7 +10,8 @@ using namespace boost;
 
 void new_client(Connection klient)
 {
-    write(klient,"Witam!\n",7);
+	string msg="Idziemy na piwo?\n";
+    write(klient,msg.c_str(),msg.size());
     klient.disconnect();
 }
 

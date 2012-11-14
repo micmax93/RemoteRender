@@ -1,5 +1,6 @@
 #ifndef UTILITIES_HPP_INCLUDED
 #define UTILITIES_HPP_INCLUDED
+using namespace std;
 
 class Semaphore
 {
@@ -44,6 +45,19 @@ class Semaphore
     }
 };
 
+
+template <class X>
+class TaskContainer
+{
+	public:
+	int owner;
+	string hash;
+	
+	ResultQueue <X> *models;
+	X task;
+};
+
+
 template <class X>
 class TaskQueue
 {
@@ -74,7 +88,7 @@ class TaskQueue
         mx.unlock();
         return n;
     }
-}
+};
 
 template <class X>
 class ResultQueue
@@ -101,7 +115,7 @@ class ResultQueue
         mx.unlock();
         return task;
     }
-}
+};
 
 template <class X>
 class RoundTasksQueue
@@ -141,17 +155,5 @@ class RoundTasksQueue
 
     }
 };
-
-template <class X>
-class TaskContainer
-{
-	public:
-	int owner;
-	string hash;
-	
-	ResultQueue *models;
-	X task;
-};
-
 
 #endif // UTILITIES_HPP_INCLUDED
