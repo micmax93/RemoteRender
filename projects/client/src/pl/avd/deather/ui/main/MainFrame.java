@@ -47,10 +47,8 @@ public class MainFrame extends JFrame implements MouseListener {
   }
 
   private void createUIComponents() {
-    table = new JTable(new DefaultTableModel(new Object[]{"Type", "Position", "Rotation", "Color"}, 8));
-    table.setSelectionMode(0);
-    DefaultTableModel model = (DefaultTableModel) table.getModel();
-    //model.addRow(new Object[]{"q", "w", "e", "r\nt"});
+    table = new JTable(new DefaultTableModel(new Object[]{"Type", "Position", "Rotation", "Color"}, 0));
+    table.setSelectionMode(0); // single row selection
   }
 
 
