@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <fcntl.h>
 //#include "utillities.hpp"
 #include "connectivity.hpp"
 #include "server.hpp"
@@ -18,7 +20,8 @@ void new_client(Connection klient)
     }
     else if(msg==protocol::NEW_CLIENT_REQ)
     {
-        write(klient,"Witam :)\n",9);
+        BufferedFileSender bf("foto.jpg");
+        bf.sendTo(klient);
     }
     klient.disconnect();
 }
