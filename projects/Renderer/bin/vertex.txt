@@ -1,0 +1,18 @@
+#version 330
+
+//Zmienne jednorodne
+uniform mat4 P;
+uniform mat4 V;
+uniform mat4 M;
+
+//Atrybuty
+in vec3 vertex;
+in vec3 color; 
+in vec3 normal;
+
+out vec4 color_out;
+
+void main(void) {
+	gl_Position=P*V*M*vec4(vertex.xyz, 1.0);
+  color_out = vec4(color, normal.z);
+}
