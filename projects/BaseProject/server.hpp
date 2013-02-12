@@ -1,20 +1,21 @@
 #ifndef SERVER_HPP_INCLUDED
 #define SERVER_HPP_INCLUDED
+#include <signal.h>
 
 namespace server
 {
     Host host;
     bool active=false;
-    boost::thread_group threads;
+    std::vector<int> children;
 
-    void initConection(int argc, char **argv)
+    void signalHandler(int sig)
     {
-        if(argc<2)
-        {
-            printf("Invalid initialization, use: %s port\n",argv[0]);
-            exit(0);
-        }
-        int port=atoi(argv[1]);
+        active=false;
+        write(host,"q",1);
+    }
+
+    void initConection(int port)
+    {
         if((port<=1024)||(port>=65535))
         {
             printf("Invalid port number, port should be greater than 1024 and lesser than 65535.\n");
@@ -25,6 +26,8 @@ namespace server
             printf("Could not inialize host connection.\n");
             exit(0);
         }
+        signal(SIGTERM,signalHandler);
+        printf("Server initialized on port %i using pid=%i.\n",port,getpid());
         active=true;
     }
 
@@ -33,20 +36,17 @@ namespace server
         while(active and host.isActive())
         {
             Connection newClient=host.waitForClient();
-            threads.add_thread(new boost::thread(client_handler,newClient));
-        }
-    }
-
-    void consoleHandler()
-    {
-        while(active)
-        {
-            char c=0;
-            scanf("%c",&c);
-            if(c=='q')
+            int pid=fork();
+            if(pid==0)
             {
-                active=false;
-                write(host,"q",1);
+                host.disconnect();
+                client_handler(newClient);
+                exit(0);
+            }
+            else
+            {
+                newClient.disconnect();
+                children.push_back(pid);
             }
         }
     }
