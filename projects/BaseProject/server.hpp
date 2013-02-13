@@ -26,6 +26,7 @@ namespace server
             printf("Could not inialize host connection.\n");
             exit(0);
         }
+        signal(SIGCLD,SIG_IGN);
         signal(SIGTERM,signalHandler);
         printf("Server initialized on port %i using pid=%i.\n",port,getpid());
         active=true;
