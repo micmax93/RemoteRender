@@ -2,7 +2,7 @@ package pl.avd.deather.test;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
+import java.nio.ByteBuffer;
 
 public class Testing {
   public Testing() {
@@ -29,38 +29,36 @@ public class Testing {
       os = s.getOutputStream();
       is = s.getInputStream();
 
+
       os.write(initCharacters);
-      int av = waitAndCountData(is, 5);
+      waitAndCountData(is, 5);
 
       DataInputStream dis = new DataInputStream(is);
-      int size = Integer.reverseBytes(dis.readInt());
-      int bufferSize = Integer.reverseBytes(dis.readInt());
+      int size = dis.readInt();
+      int bufferSize = dis.readInt();
       log("size = " + size + ", bufferSize = " + bufferSize);
-      s.setReceiveBufferSize(size * 2);
 
       int maxPackets = (int) Math.ceil((double) size / (double) bufferSize);
       DataOutputStream dos = new DataOutputStream(os);
+      ByteBuffer bb = ByteBuffer.allocate(4);
+      bb.putInt(maxPackets);
+      os.write(bb.array());
 
-      dos.writeInt(Integer.reverseBytes(maxPackets));
       log("sent num packets = " + maxPackets);
 
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
+      s.setReceiveBufferSize(size * 2);
+      log("max buffer size = " + s.getReceiveBufferSize());
 
+      int total = 0;
+      int count = 0;
       byte buffer[] = new byte[bufferSize];
-      for (int i = 0; i < maxPackets; i++) {
-        int count = waitAndCountDataSize(is, bufferSize, 5);
-        if (count == 0) {
-          log("Couldn't read. Breaking.");
-          break;
-        }
-        count = is.read(buffer, 0, bufferSize);
-        byte[] tmp;
-        tmp = Arrays.copyOfRange(buffer, 0, count);
-        baos.write(tmp);
-        log(i + " read = " + count + " bytes, total = " + baos.size() + " left = " + is.available());
+      FileOutputStream fos = new FileOutputStream("test.jpg");
+      while(total < size && ((count = is.read(buffer)) > 0)) {
+        fos.write(buffer, 0, count);
+        total += count;
       }
-      log("Collected total = " + baos.size() + " bytes");
+      fos.close();
 
       s.close();
     } catch (IOException e) {
@@ -73,7 +71,6 @@ public class Testing {
 
   public int waitAndCountDataSize(InputStream is, int sizeExpected, int maxSecs) throws IOException, InterruptedException {
     int mul = 500;
-
     maxSecs *= mul;
     while (maxSecs > 0) {
       maxSecs--;
