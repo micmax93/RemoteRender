@@ -59,7 +59,6 @@ public class Testing {
         total += count;
       }
       fos.close();
-
       s.close();
     } catch (IOException e) {
       log(e.toString());
