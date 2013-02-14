@@ -34,14 +34,20 @@ int main(int argc,char **argv)
     write(serwer,&ping,sizeof(ping));
 
     int total_size,buf_size,count;
+
     // odbiera rozmiar całego pliku
-    read(serwer,&total_size,sizeof(total_size));
+    //read(serwer,&total_size,sizeof(total_size));
+    readNetInt(serwer,&total_size);
+
     // odbiera rozmiar bufora
-    read(serwer,&buf_size,sizeof(buf_size));
+    //read(serwer,&buf_size,sizeof(buf_size));
+    readNetInt(serwer,&buf_size);
+
     // wylicza ilość buforów do odebrania
     count=ceil((float)total_size/(float)buf_size);
     // wysyła tą ilość (taki jakby checksum)
-    write(serwer,&count,sizeof(count));
+    //write(serwer,&count,sizeof(count));
+    writeNetInt(serwer,&count);
 
     //odebranie i zapis bufforów
     void *buf=malloc(buf_size);

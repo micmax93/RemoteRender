@@ -254,4 +254,20 @@ class Host: public Connection
     }
 };
 
+
+int writeNetInt(int client,int *msg)
+{
+    int nmsg=0;
+    nmsg=htonl(*msg);
+    return write(client,&nmsg,sizeof(int));
+}
+
+int readNetInt(int client,int *msg)
+{
+    int nmsg=0,status=0;
+    status=read(client,&nmsg,sizeof(int));
+    *msg=ntohl(nmsg);
+    return status;
+}
+
 #endif // KLASY_HPP_INCLUDED

@@ -2,10 +2,10 @@
 #include <vector>
 #include <stdio.h>
 #include <fcntl.h>
-//#include "utillities.hpp"
-#include "connectivity.hpp"
-#include "server.hpp"
 #include "protocol.hpp"
+#include "connectivity.hpp"
+#include "utilities.hpp"
+#include "server.hpp"
 #include "client.hpp"
 using namespace std;
 

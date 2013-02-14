@@ -1,159 +1,277 @@
 #ifndef UTILITIES_HPP_INCLUDED
 #define UTILITIES_HPP_INCLUDED
+#include <math.h>
+typedef unsigned char uchar;
 using namespace std;
 
-class Semaphore
+class BufferedFileSender
 {
-    int count;
-    boost::mutex outer_mx;
-    boost::mutex  inner_mx;
+    int file;
+    int buf_size;
+    int total_size;
+    vector<void*> file_content;
 
-    public:
-
-    Semaphore()
+    void load_file(string fname)
     {
-        count=0;
-        inner_mx.lock();
+        file=open(fname.c_str(),O_RDONLY);
+        if(file<0)
+        {
+            printf("Error: no file to send!\n");
+            exit(0);
+        }
+
+        total_size=0;
+        void *buf;
+        int curr_size;
+
+        do
+        {
+            buf=malloc(buf_size);
+            curr_size=read(file,buf,buf_size);
+            total_size+=curr_size;
+            file_content.push_back(buf);
+        }
+        while(curr_size==buf_size);
+
+        close(file);
     }
 
-    void get()
+    void link_buffer(uchar *buf,int size)
     {
-        outer_mx.lock();
-        if(count>0)
+        total_size=size;
+        int curr=0;
+
+        while(curr<total_size)
         {
-            count--;
+            file_content.push_back(buf+curr);
+            curr+=buf_size;
+        }
+    }
 
-            if(count>0)
-                {inner_mx.unlock();}
+    bool send_content(int client)
+    {
+        //write(client,&total_size,sizeof(total_size));
+        writeNetInt(client,&total_size);
+        printf("Total file size: %i\n",total_size);
 
-            outer_mx.unlock();
+        //write(client,&buf_size,sizeof(buf_size));
+        writeNetInt(client,&buf_size);
+        printf("Buffer size: %i\n",buf_size);
+
+        int chksum=0,n=0;
+        //n=read(client,&chksum,sizeof(chksum));
+        n=readNetInt(client,&chksum);
+        printf("Recieved checksum %i in %i bytes ",chksum,n);
+        if(chksum!=(int)file_content.size())
+        {
+            printf("FAILED\n");
+            printf("Expected checksum %i\n",(int)file_content.size());
+            return false;
+        }
+        printf("OK\n");
+
+
+        printf("Packets send:\n");
+        for(uint i=0; i<file_content.size(); i++)
+        {
+            int c;
+            if(total_size>buf_size)
+            {
+                c=write(client,file_content[i],buf_size);
+                total_size-=buf_size;
+            }
+            else
+            {
+                c=write(client,file_content[i],total_size);
+                total_size=0;
+            }
+            printf("packet %i : %i bytes\n",i,c);
+        }
+        printf("FINISHED\n");
+        return true;
+    }
+
+public:
+    BufferedFileSender(string fname)
+    {
+        buf_size=protocol::BUF_SIZE;
+        load_file(fname);
+    }
+
+    BufferedFileSender(uchar *buf,int size)
+    {
+        buf_size=protocol::BUF_SIZE;
+        link_buffer(buf,size);
+    }
+
+    ~BufferedFileSender()
+    {
+        for(uint i=0; i<file_content.size(); i++)
+        {
+            free(file_content[i]);
+        }
+        file_content.clear();
+    }
+
+    bool sendTo(int client)
+    {
+        if(file_content.empty())
+        {
+            return false;
         }
         else
         {
-            outer_mx.unlock();
-            inner_mx.lock();
-            get();
+            return send_content(client);
+        }
+    }
+};
+
+class BufferedFileReciever
+{
+    FILE *file;
+    int buf_size;
+    int total_size;
+
+    bool download_content(int client)
+    {
+        int count=ceil((float)total_size/(float)buf_size);
+        void *buf=malloc(buf_size);
+        while(count--)
+        {
+            int n;
+            n=read(client,buf,buf_size);
+            fwrite(buf,sizeof(char),n,file);
+        }
+        return true;
+    }
+
+public:
+    BufferedFileReciever()
+    {
+        buf_size=protocol::BUF_SIZE;
+        file=tmpfile();
+        if(file==NULL)
+        {
+            printf("Temp file error: could not create.\n");
+            exit(0);
         }
     }
 
-    void add(int n=1)
+    BufferedFileReciever(int size)
     {
-        outer_mx.lock();
-        count+=n;
-        inner_mx.unlock();
-        outer_mx.unlock();
+        total_size=size;
+        buf_size=protocol::BUF_SIZE;
+        file=tmpfile();
+        if(file==NULL)
+        {
+            printf("Temp file error: could not create.\n");
+            exit(0);
+        }
+    }
+
+    void initDownload(int client)
+    {
+        download_content(client);
+    }
+
+    ~BufferedFileReciever()
+    {
+        fclose(file);
+    }
+
+    FILE *getFilePtr()
+    {
+        return file;
+    }
+
+    operator FILE*()
+    {
+        return file;
     }
 };
 
 
-template <class X>
-class TaskContainer
-{
-	public:
-	int owner;
-	string hash;
-	
-	ResultQueue <X> *models;
-	X task;
-};
 
 
-template <class X>
-class TaskQueue
+
+class XmlElement
 {
-    queue <X> tasks;
-    boost::mutex mx;
+    vector <string> args_names;
+    vector <string> args_values;
+    string elements_name;
+    protected:
+    XmlElement(string name)
+    {
+        elements_name=name;
+    }
+
+    void addArgument(string name,string value)
+    {
+        args_names.push_back(name);
+        args_values.push_back(value);
+    }
+    void clearArgs()
+    {
+        args_names.clear();
+        args_values.clear();
+    }
+
+    void setExistingArgVal(string arg,string value)
+    {
+        for(uint i=0;i<args_names.size();i++)
+        {
+            if(args_names[i]==arg)
+            {
+                args_values[i]=value;
+            }
+        }
+    }
+
+    virtual string getContent();
 
     public:
-
-    void add(X task)
+    string getXml()
     {
-        mx.lock();
-        tasks.push(task);
-        mx.unlock();
-    }
-
-    X get()
-    {
-        mx.lock();
-        X task=tasks.pop();
-        mx.unlock();
-        return task;
-    }
-
-    int size()
-    {
-        mx.lock();
-        int n=tasks.size();
-        mx.unlock();
-        return n;
+        string xml="";
+        xml+="<"+elements_name;
+        for(uint i=0;i<args_names.size();i++)
+        {
+            xml+=" "+args_names[i]+"="+args_values[i];
+        }
+        xml+=">";
+        xml+=getContent();
+        xml+="</"+elements_name+">";
+        return xml;
     }
 };
 
-template <class X>
-class ResultQueue
+class XmlGroup: public XmlElement
 {
-    queue <X> tasks;
-    boost::mutex mx;
-    Semaphore sem;
-
-    public:
-
-    void add(X task)
+    vector<XmlElement*> children;
+    protected:
+    XmlGroup(string name): XmlElement(name)
     {
-        mx.lock();
-        tasks.push(task);
-        mx.unlock();
-        sem.add();
     }
 
-    X get()
+    void addChild(XmlElement *ele)
     {
-        sem.get();
-        mx.lock();
-        X task=tasks.pop();
-        mx.unlock();
-        return task;
+        children.push_back(ele);
     }
-};
-
-template <class X>
-class RoundTasksQueue
-{
-    boost::mutex edit;
-    vector< TaskQueue <X>* > tasksPointers;
-    int curr;
-    Semaphore tasksCount;
-
-    public:
-
-    RoundTasksQueue()
+    void clearChildren()
     {
-        curr=0;
+        children.clear();
     }
 
-    void newQueue(TaskQueue <X> *tasksPtr,int size)
+    virtual string getContent()
     {
-        edit.lock();
-        tasksPointers.push_back(tasksPtr);
-        edit.unlock();
-        tasksCount.add(size);
-    }
-
-    X getTask()
-    {
-        tasksCount.get();
-        edit.lock();
-        curr=(curr+1)%(tasksPointers.size());
-        X task=tasksPointers[curr]->get();
-        edit.unlock();
-        return task;
-    }
-
-    void addPriorityTask(X task)
-    {
-
+        string str="";
+        for(uint i=0;i<children.size();i++)
+        {
+            str+=children[i]->getXml();
+        }
+        return str;
     }
 };
+
 
 #endif // UTILITIES_HPP_INCLUDED
