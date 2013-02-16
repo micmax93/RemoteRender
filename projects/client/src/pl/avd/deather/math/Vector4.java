@@ -44,11 +44,10 @@ public class Vector4<T> {
 
   @Override
   public String toString() {
-    return "[" +
-        "x=" + x +
-        ", y=" + y +
-        ", z=" + z +
-        ", w=" + w +
-        ']';
+    return "(" +
+        x + ", " +
+        y + ", " +
+        z + ", " +
+        w + ")";
   }
 }

@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class RenderSocket {
   private static final int MAX_DELAY = 1000 * 10; // 10 secs
-  private final Socket socket;
+  private Socket socket;
   private boolean interrupted = false;
   private int bufferSize;
 
@@ -21,18 +21,34 @@ public class RenderSocket {
 //  c -> jpg_count
 //  s -> jpg_data[]
 
-  public RenderSocket(Socket socket) throws InterruptException {
-    this.socket = socket;
+  public RenderSocket(String host, int port) throws InterruptException, IOException {
+    this.socket = new Socket(host, port);
+    System.out.println("Connected to " + socket);
+    sendInitCharacter();
     readBufferSize();
   }
 
-  private void readBufferSize() throws InterruptException {
+  private void sendInitCharacter() throws InterruptException {
+    try {
+      String msg = "#";
+      byte initCharacters[] = msg.getBytes("US-ASCII");
+      socket.getOutputStream().write(initCharacters);
+    } catch (IOException e) {
+      throw new InterruptException("Interrupted.");
+    }
 
+  }
+
+  private void readBufferSize() throws InterruptException {
     try {
       InputStream is = socket.getInputStream();
       DataInputStream dis = new DataInputStream(is);
+      while (is.available() == 0) {
+      }
+      System.out.println("Available " + is.available());
       waitForData(4, MAX_DELAY);
       bufferSize = dis.readInt();
+      System.out.println("Read buffer size = " + bufferSize);
     } catch (IOException e) {
       throw new InterruptException("Interrupted.");
     }
@@ -46,13 +62,16 @@ public class RenderSocket {
       int expectedCheckSum = (int) Math.ceil((double) data.length / (double) bufferSize);
 
       writeInt(data.length);
+      System.out.println("Sent " + data.length);
       int checkSum = readInt();
+      System.out.println("Read checksum " + checkSum + ", expected = " + checkSum);
 
       if (checkSum != expectedCheckSum) {
         throw new InterruptException("Received checksum is different.");
       }
 
       os.write(data);
+      System.out.println("Sent xml " + data.length);
     } catch (IOException e) {
       throw new InterruptException("Interrupted.");
     }
@@ -61,6 +80,8 @@ public class RenderSocket {
   public byte[] getImageBytes() throws InterruptException {
     try {
       int imageSize = readInt();
+      System.out.println("Read image size = " + imageSize);
+
       int num = (int) Math.ceil((double) imageSize / (double) bufferSize);
       writeInt(num);
 
@@ -74,13 +95,13 @@ public class RenderSocket {
 
 
       long timer = getTime();
-      while (total < imageSize && ((n = is.read(buffer)) > 0)) {
-        if(getTime() - timer > MAX_DELAY) {
+      while(total < imageSize && ((n = is.read(buffer)) > 0)) {
+        if (getTime() - timer > MAX_DELAY) {
           throw new InterruptException("Max delay exceed.");
         }
         timer = getTime();
-        baos.write(buffer, 0, num);
-        total += num;
+        baos.write(buffer, 0, n);
+        total += n;
       }
       return baos.toByteArray();
     } catch (IOException e) {

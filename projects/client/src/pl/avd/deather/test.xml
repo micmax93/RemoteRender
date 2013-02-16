@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<scene>
+    <objects>
+        <cube>
+            <color>red</color>
+            <location>
+                <x>0.0</x>
+                <y>0.0</y>
+                <z>0.0</z>
+            </location>
+            <rotation>
+                <angle>0.0</angle>
+                <x>0.0</x>
+                <y>0.0</y>
+                <z>0.0</z>
+            </rotation>
+            <size>2.0</size>
+        </cube>
+        <sphere>
+            <color>blue</color>
+            <location>
+                <x>1.0</x>
+                <y>1.0</y>
+                <z>1.0</z>
+            </location>
+            <radius>0.2</radius>
+            <rotation>
+                <angle>0.0</angle>
+                <x>0.0</x>
+                <y>0.0</y>
+                <z>0.0</z>
+            </rotation>
+        </sphere>
+    </objects>
+    <camera>
+        <eye>
+            <x>1.5</x>
+            <y>-4.4</y>
+            <z>2.4</z>
+        </eye>
+        <lookAt>
+            <x>-1.9</x>
+            <y>3.5</y>
+            <z>-2.4</z>
+        </lookAt>
+    </camera>
+</scene>
