@@ -1,45 +1,42 @@
 package pl.avd.deather.ui.dialog;
 
+
 import pl.avd.deather.ui.handler.SphereDialogOkHandler;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 public class SphereDialog extends JDialog {
-  private JPanel contentPane;
   private JButton buttonOK;
   private JButton buttonCancel;
-  private JTextField xPos;
-  private JTextField yPos;
-  private JTextField zPos;
-  private JSlider angleSlider;
+  private JPanel mainPanel;
+  private JTextField angleRot;
   private JTextField xRot;
   private JTextField yRot;
   private JTextField zRot;
-  private JSlider redSlider;
-  private JSlider greenSlider;
-  private JSlider blueSlider;
-  private JSlider radiusSlider;
+  private JTextField xPos;
+  private JTextField yPos;
+  private JTextField zPos;
+  private JTextField radius;
+  private JComboBox<String> colorComboBox;
   private SphereDialogOkHandler handler;
 
+  private Dimension dim = new Dimension(250, 300);
+  private Dimension subDim = new Dimension(250, 40);
+
   public SphereDialog(SphereDialogOkHandler handler) {
+    createWidgets();
+
     this.handler = handler;
-    setContentPane(contentPane);
+
+    setMinimumSize(dim);
+    setMaximumSize(dim);
+
+    setContentPane(mainPanel);
     setModal(true);
     getRootPane().setDefaultButton(buttonOK);
-    setTitle("Create new sphere");
-
-    buttonOK.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        onOK();
-      }
-    });
-
-    buttonCancel.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        onCancel();
-      }
-    });
+    setTitle("Create sphere");
 
 // call onCancel() when cross is clicked
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -50,7 +47,7 @@ public class SphereDialog extends JDialog {
     });
 
 // call onCancel() on ESCAPE
-    contentPane.registerKeyboardAction(new ActionListener() {
+    mainPanel.registerKeyboardAction(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         onCancel();
       }
@@ -58,23 +55,96 @@ public class SphereDialog extends JDialog {
     pack();
   }
 
-  private void onOK() {
-    handler.onOk(Double.valueOf(xPos.getText()), Double.valueOf(yPos.getText()), Double.valueOf(zPos.getText()),
-        Double.valueOf(xRot.getText()), Double.valueOf(yRot.getText()), Double.valueOf(zRot.getText()), angleSlider.getValue(),
-        redSlider.getValue(), greenSlider.getValue(), blueSlider.getValue(),
-        radiusSlider.getValue());
-    dispose();
+  private void createWidgets() {
+    mainPanel = new JPanel();
+    mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+    JPanel cubePanel = new JPanel();
+    cubePanel.setBorder(BorderFactory.createTitledBorder("Sphere radius and color"));
+    cubePanel.setLayout(new BoxLayout(cubePanel, BoxLayout.X_AXIS));
+    radius = new JFormattedTextField(0.0f);
+    colorComboBox = new JComboBox<String>(new String[]{"red", "blue"});
+    cubePanel.add(radius);
+    cubePanel.add(colorComboBox);
+    mainPanel.add(cubePanel);
+    cubePanel.setMaximumSize(subDim);
+
+    mainPanel.add(new Box.Filler(subDim, subDim, subDim));
+
+    JPanel positionPanel = new JPanel();
+    positionPanel.setBorder(BorderFactory.createTitledBorder("Position"));
+    positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.X_AXIS));
+    xPos = new JFormattedTextField(0.0f);
+    yPos = new JFormattedTextField(0.0f);
+    zPos = new JFormattedTextField(0.0f);
+    positionPanel.add(xPos);
+    positionPanel.add(yPos);
+    positionPanel.add(zPos);
+    mainPanel.add(positionPanel);
+    positionPanel.setMaximumSize(subDim);
+
+    mainPanel.add(new Box.Filler(subDim, subDim, subDim));
+
+    JPanel rotationPanel = new JPanel();
+    rotationPanel.setBorder(BorderFactory.createTitledBorder("Rotation XYZ alpha"));
+    rotationPanel.setLayout(new BoxLayout(rotationPanel, BoxLayout.X_AXIS));
+    xRot = new JFormattedTextField(0.0f);
+    yRot = new JFormattedTextField(0.0f);
+    zRot = new JFormattedTextField(0.0f);
+    angleRot = new JFormattedTextField(0.0f);
+    rotationPanel.add(xRot);
+    rotationPanel.add(yRot);
+    rotationPanel.add(zRot);
+    rotationPanel.add(angleRot);
+    mainPanel.add(rotationPanel);
+    rotationPanel.setMaximumSize(subDim);
+
+    mainPanel.add(new Box.Filler(subDim, subDim, subDim));
+
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+    buttonOK = new JButton("OK");
+    buttonCancel = new JButton("Cancel");
+    buttonPanel.add(buttonOK);
+    buttonPanel.add(buttonCancel);
+    mainPanel.add(buttonPanel);
+    buttonPanel.setMaximumSize(subDim);
+
+    mainPanel.add(new Box.Filler(subDim, subDim, subDim));
+
+    buttonOK.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        onOK();
+      }
+    });
+    buttonCancel.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        onCancel();
+      }
+    });
   }
+
+  private void onOK() {
+    try {
+      if (Double.valueOf(radius.getText()) <= 0) {
+        throw new Exception();
+      }
+
+      Validator.checkOrThrow(new JTextField[]{xPos, yPos, zPos, xRot, yRot, zRot, angleRot, radius});
+
+      handler.onOk(Double.parseDouble(xPos.getText()), Double.valueOf(yPos.getText()), Double.valueOf(zPos.getText()),
+          Double.valueOf(xRot.getText()), Double.valueOf(yRot.getText()), Double.valueOf(zRot.getText()), Double.valueOf(angleRot.getText()),
+          (String) colorComboBox.getSelectedItem(), Double.valueOf(radius.getText()));
+      dispose();
+    } catch (Exception e) {
+      JOptionPane.showMessageDialog(null, "Must be valid floating point number.\nRadius must be > 0.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
 
   private void onCancel() {
 // add your code here if necessary
     dispose();
   }
 
-//  public static void main(String[] args) {
-//    SphereDialog dialog = new SphereDialog();
-//    dialog.pack();
-//    dialog.setVisible(true);
-//    System.exit(0);
-//  }
 }

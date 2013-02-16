@@ -6,9 +6,9 @@ import pl.avd.deather.math.Vector4;
 public abstract class BaseObject {
   protected Vector3<Double> position;
   protected Vector4<Double> rotation;
-  protected Vector3<Integer> color;
+  protected String color;
 
-  public BaseObject(Vector3<Double> position, Vector4<Double> rotation, Vector3<Integer> color) {
+  public BaseObject(Vector3<Double> position, Vector4<Double> rotation, String color) {
     this.position = position;
     this.rotation = rotation;
     this.color = color;
@@ -22,9 +22,13 @@ public abstract class BaseObject {
     return rotation;
   }
 
-  public Vector3<Integer> getColor() {
+  public String getColor() {
     return color;
   }
 
   public abstract String info();
+
+  public abstract String getBaseName();
+
+  public abstract Object toXmlObject();
 }
