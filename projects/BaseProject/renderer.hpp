@@ -62,8 +62,10 @@ void displayFrame() {
         std::vector<Object*> *objects = scene->getObjects();
         printf("Drawing %d objects.\n", objects->size());
         for (int i = 0; i < objects->size(); i++) {
-            std::cout << "Draw object!" << std::endl;
+            std::cout << "Draw object!" << std::endl;            
             Object *o = (*objects)[i];
+            printf("%i\n", o);
+            o->test();
             o->draw(shader);
         }
     }
@@ -260,7 +262,10 @@ namespace renderer
         Reader reader(shader);
         reader.loadFile(xml);
         if (reader.isValid()) {
+            printf("Read valid scene.\n");
             scene = reader.getScene();
+        } else {
+            printf("Scene is invalid!\n");
         }
     }
 
