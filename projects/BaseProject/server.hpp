@@ -27,13 +27,13 @@ namespace server {
         active = true;
     }
 
-    void mainLoop(void (*client_handler)(Connection)) {
+    void mainLoop() {
         while (active and host.isActive()) {
             Connection newClient = host.waitForClient();
             int pid = fork();
             if (pid == 0) {
                 host.disconnect();
-                client_handler(newClient);
+                client::new_connection(newClient);
                 exit(0);
             } else {
                 newClient.disconnect();

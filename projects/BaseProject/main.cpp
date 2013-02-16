@@ -5,10 +5,10 @@
 #include "protocol.hpp"
 #include "connectivity.hpp"
 #include "utilities.hpp"
-#include "server.hpp"
 #include "renderer.hpp"
 #include "Reader.h"
 #include "client.hpp"
+#include "server.hpp"
 using namespace std;
 
 int debug_mode = TRUE;
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     if (cmd == "start") {
         if (!fork()) {
             server::initConection(port);
-            server::mainLoop(client::new_connection);
+            server::mainLoop();
         }
     } else if (cmd == "stop") {
         int pid = server::getServerPid(port);
