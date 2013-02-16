@@ -17,9 +17,6 @@
 #include "Sphere.h"
 #include "Reader.h"
 
-glm::mat4 matP; //rzutowania
-glm::mat4 matV; //widoku
-
 using namespace std;
 using namespace cv;
 
@@ -81,12 +78,6 @@ int windowHeight = 400;
 float cameraAngle = 45.0f;
 
 Shader *shader;
-
-GLuint vao;
-GLuint bufVertices;
-GLuint bufColors;
-GLuint bufNormals;
-
 Scene *scene = NULL;
 
 void onIdle()
@@ -105,21 +96,14 @@ void displayFrame()
             printf("Object pointer = %d\n", o);
         }
     }
+     
+    glm::mat4 matP = glm::perspective(cameraAngle, (float) windowWidth / (float) windowHeight, 1.0f, 100.0f);
+    glm::mat4 matV = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     
-    
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    matP = glm::perspective(cameraAngle, (float) windowWidth / (float) windowHeight, 1.0f, 100.0f);
-    matV = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    shader->bind();
     glUniformMatrix4fv(shader->getProjectionMatrixUniform(), 1, false, glm::value_ptr(matP));
     glUniformMatrix4fv(shader->getViewMatrixUniform(), 1, false, glm::value_ptr(matV));
 
     printf("DRAW!\n");
-    // TODO draw
-
     printf("Scene pointer = %d\n", scene);
     
     if(scene != NULL) {
@@ -176,23 +160,13 @@ void initOpenGL()
 {
     setupShaders();
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void cleanShaders()
 {
     delete shader;
-}
-
-void freeVBO()
-{
-    glDeleteBuffers(1, &bufVertices);
-    glDeleteBuffers(1, &bufColors);
-    glDeleteBuffers(1, &bufNormals);
-}
-
-void freeVAO()
-{
-    glDeleteVertexArrays(1, &vao);
 }
 
 void getViewportSize(int *width, int *height)
@@ -325,8 +299,6 @@ Image renderImage()
 
 void cleanRenderer()
 {
-    freeVAO();
-    freeVBO();
     cleanShaders();
 }
 
