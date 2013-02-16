@@ -256,7 +256,7 @@ namespace renderer
     void loadScene(FILE *xml)
     {
         Reader reader(shader);
-        reader.loadFile("scene.xml");
+        reader.loadFile(xml);
         if (reader.isValid()) {
             scene = reader.getScene();
         }
