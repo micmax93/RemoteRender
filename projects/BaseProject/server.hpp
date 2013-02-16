@@ -51,6 +51,19 @@ namespace server
             }
         }
     }
+
+    int getServerPid(int port)
+    {
+        Connection conn;
+        conn.initByAddr(Addr("localhost",port));
+
+        char msg=protocol::GET_HOST_PID;
+        write(conn,&msg,sizeof(msg));
+
+        int pid;
+        read(conn,&pid,sizeof(pid));
+        return pid;
+    }
 }
 
 #endif // SERVER_HPP_INCLUDED
