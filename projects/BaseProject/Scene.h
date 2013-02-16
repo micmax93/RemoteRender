@@ -61,12 +61,12 @@ public:
     void addObject(Object *o);
     
     std::vector<Object*> *getObjects() {
-        return &objects;
+        return objects;
     }
 private:
     float eyeX, eyeY, eyeZ;
     float lookAtX, lookAtY, lookAtZ;
-    std::vector<Object*> objects;
+    std::vector<Object*> *objects;
 };
 
 #endif	/* SCENE_H */

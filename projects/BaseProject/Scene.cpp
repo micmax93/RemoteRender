@@ -8,6 +8,7 @@
 #include "Scene.h"
 
 Scene::Scene() {
+    this->objects = new std::vector<Object*>();
 }
 
 Scene::~Scene() {
@@ -15,7 +16,8 @@ Scene::~Scene() {
 
 void Scene::addObject(Object *o) {
     if (o != NULL) {
-        (this->objects).push_back(o);
+        printf("Added object to scene.\n");
+        (this->objects)->push_back(o);
     }
 }
 
