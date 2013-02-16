@@ -106,7 +106,7 @@ using namespace std;
     BufferedFileReciever::BufferedFileReciever()
     {
         file=tmpfile();
-        //file=fopen("plik1","w");
+        //file=fopen("plik2","w");
         if(file==NULL)
         {
             printf("Temp file error: could not create.\n");
@@ -120,7 +120,7 @@ using namespace std;
         total_size=totalSize;
         buf_size=bufSize;
         file=tmpfile();
-        //file=fopen("plik1","w");
+        //file=fopen("tmp.xml","w");
         if(file==NULL)
         {
             printf("Temp file error: could not create.\n");

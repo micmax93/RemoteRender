@@ -60,12 +60,14 @@ void displayFrame() {
 
     if (scene != NULL) {
         std::vector<Object*> *objects = scene->getObjects();
+        printf("Drawing %d objects.\n", objects->size());
         for (int i = 0; i < objects->size(); i++) {
             std::cout << "Draw object!" << std::endl;
             Object *o = (*objects)[i];
             o->draw(shader);
         }
     }
+    printf("Scene drawn.\n");
     //    glutSwapBuffers();
 }
 
