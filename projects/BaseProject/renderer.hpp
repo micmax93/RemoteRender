@@ -73,8 +73,6 @@ public:
 };
 
 
-namespace renderer
-{
 //Ustawienia okna i rzutowania
 int windowPositionX = 100;
 int windowPositionY = 100;
@@ -312,6 +310,5 @@ void cleanRenderer()
     freeVAO();
     freeVBO();
     cleanShaders();
-}
 }
 

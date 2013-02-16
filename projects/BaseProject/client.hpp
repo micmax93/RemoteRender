@@ -49,11 +49,15 @@ namespace client
 
         FILE *xml_file=xml_data;
 
-
-        renderer::initRenderer();
-        renderer::loadScene(xml_file);
-        Image img=renderer::renderImage();
-        renderer::cleanRenderer();
+//
+//        renderer::initRenderer();
+//        renderer::loadScene(xml_file);
+//        Image img=renderer::renderImage();
+//        renderer::cleanRenderer();
+        initRenderer();
+        loadScene(xml_file);
+        Image img=renderImage();
+        cleanRenderer();
 
 
         int jpg_size=img.size();
