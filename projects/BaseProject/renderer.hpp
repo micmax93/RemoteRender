@@ -10,7 +10,7 @@
 #include <cv.h>
 #include <highgui.h>
 #define TIXML_USE_STL
-#include "xml/tinyxml.h"
+#include <tinyxml.h>
 #include "Shader.h"
 #include "Object.h"
 #include "Cube.h"

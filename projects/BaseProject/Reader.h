@@ -3,7 +3,7 @@
 #define	READER_H
 
 #include "Scene.h"
-#include "xml/tinyxml.h"
+#include <tinyxml.h>
 #include <iostream>
 #include "Shader.h"
 
