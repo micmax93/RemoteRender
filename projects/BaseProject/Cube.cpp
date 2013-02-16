@@ -170,24 +170,19 @@ void Cube::createBuffers() {
 }
 
 void Cube::draw(Shader *shader) {
-    printf("Drawing cube\n");
     glUniformMatrix4fv(shader->getModelMatrixUniform(), 1, false, glm::value_ptr(modelMatrix));
 
     glBindBuffer(GL_ARRAY_BUFFER, this->vertexBuffer);
     glVertexAttribPointer(shader->getVertexAttribute(), 3, GL_FLOAT, GL_FALSE, 0, 0);
-    printf("ERROR = %d\n", glGetError());
 
     glBindBuffer(GL_ARRAY_BUFFER, this->colorBuffer);
     glVertexAttribPointer(shader->getColorAttribute(), 3, GL_FLOAT, GL_FALSE, 0, 0);
-    printf("ERROR = %d\n", glGetError());
 
     glBindBuffer(GL_ARRAY_BUFFER, this->normalBuffer);
     glVertexAttribPointer(shader->getNormalAttribute(), 3, GL_FLOAT, GL_FALSE, 0, 0);
-    printf("ERROR = %d\n", glGetError());
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
-    printf("ERROR = %d\n", glGetError());
 }
 
 void Cube::setupVao(Shader* shader) {

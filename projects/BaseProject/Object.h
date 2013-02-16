@@ -19,7 +19,6 @@ public:
     void setModelMatrix(glm::mat4 modelMatrix);
     void rotate(float x, float y, float z, float angle);
     void translate(float x, float y, float z);
-    virtual void test() {printf("testing: Object\n");}
 private:
 protected:
     GLuint vertexBuffer;

@@ -1,4 +1,4 @@
-/*
+/* 
  * File:   Cube.h
  * Author: deather
  *
@@ -22,7 +22,6 @@ public:
     virtual void createBuffers();
     virtual void draw(Shader *shader);
     virtual void setupVao(Shader *shader);
-    virtual void test() {printf("testing: Cube\n");}
 private:
     void createArrays();
     float *v;

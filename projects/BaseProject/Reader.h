@@ -17,8 +17,8 @@ public:
         return valid;
     }
 
-    Scene getScene() {
-        return scene;
+    Scene *getScene() {
+        return &scene;
     }
 private:
     void check();

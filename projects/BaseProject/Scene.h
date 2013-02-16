@@ -4,7 +4,6 @@
 
 #include <vector>
 #include "Object.h"
-#include "Cube.h"
 
 class Scene {
 public:
@@ -59,15 +58,15 @@ public:
         this->lookAtZ = lookAtZ;
     }
     
-    void addCube(Cube cube);
+    void addObject(Object *o);
     
-    std::vector<Cube> *getCubes() {
-        return &cubes;
+    std::vector<Object*> *getObjects() {
+        return &objects;
     }
 private:
     float eyeX, eyeY, eyeZ;
     float lookAtX, lookAtY, lookAtZ;
-    std::vector<Cube> cubes = std::vector<Cube>();
+    std::vector<Object*> objects;
 };
 
 #endif	/* SCENE_H */

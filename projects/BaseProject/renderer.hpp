@@ -1,3 +1,6 @@
+#ifndef renderer_lock
+#define renderer_lock
+
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -20,219 +23,177 @@
 using namespace std;
 using namespace cv;
 
-
-
-class Image
-{
+class Image {
+private:
     bool valid;
     vector<uchar> vbuf;
     int file_size;
     uchar *data;
 
 public:
-    Image(Mat img,int quality=95)
-    {
+
+    Image(Mat img, int quality = 95) {
         vector<int> params;
         params.push_back(CV_IMWRITE_JPEG_QUALITY);
         params.push_back(quality);
-
-        valid=imencode(".jpg",img,vbuf,params);
-
-        file_size=vbuf.size();
-        data=vbuf.data();
+        valid = imencode(".jpg", img, vbuf, params);
+        file_size = vbuf.size();
+        data = vbuf.data();
     }
-    ~Image()
-    {
+
+    ~Image() {
         vbuf.clear();
     }
 
-    bool isValid()
-    {
+    bool isValid() {
         return valid;
     }
 
-    uchar *getDataPtr()
-    {
-        if(valid)
-        {
+    uchar *getDataPtr() {
+        if (valid) {
             return data;
-        }
-        else
-        {
+        } else {
             return NULL;
         }
     }
 
-    int size()
-    {
+    int size() {
         return file_size;
     }
 };
 
-void displayFrame(Shader *shader, Scene *scene)
-{
-    printf("\n\n\n");
-    printf("Scene pointer = %d\n", scene);
+
+namespace renderer {
+
+    int windowWidth = 512;
+    int windowHeight = 512;
+
+    Mat getImage(float* pixels, int width, int height) {
+        Mat image(width, height, CV_32FC3);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.at<Vec3f > (width - x - 1, y)[0] = 255 * pixels[3 * (x * height + y) + 0];
+                image.at<Vec3f > (width - x - 1, y)[1] = 255 * pixels[3 * (x * height + y) + 1];
+                image.at<Vec3f > (width - x - 1, y)[2] = 255 * pixels[3 * (x * height + y) + 2];
+            }
+        }
+        return image;
+    }
+
+    void displayFrame(Scene *scene, Shader *shader) {
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        float cameraAngle = 45.0f;
+        glm::mat4 matP = glm::perspective(cameraAngle, (float) windowWidth / (float) windowHeight, 1.0f, 100.0f);
+        glm::mat4 matV = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        shader->bind();
+        glUniformMatrix4fv(shader->getProjectionMatrixUniform(), 1, false, glm::value_ptr(matP));
+        glUniformMatrix4fv(shader->getViewMatrixUniform(), 1, false, glm::value_ptr(matV));
+
+        printf("Display frame.!\n");
+
+        //shader->bind();
+
+        //        if (scene != NULL) {
+        //            std::vector<Object*> *objects = scene->getObjects();
+        //            for (int i = 0; i < objects->size(); i++) {
+        //                std::cout << "Draw object!" << std::endl;
+        //                Object *o = (*objects)[i];
+        //                o->draw(shader);
+        //            }
+        //        }
+        //    glutSwapBuffers();
+    }
+
+    void onChangeSize(int w, int h) {
+        glViewport(0, 0, w, h);
+    }
+
+    void initGLUT() {
+        char *myargv [1];
+        int myargc = 1;
+        myargv [0] = "Myappname";
         
-    int windowWidth = 400;
-    int windowHeight = 400;
-    float cameraAngle = 45.0f;
+        glutInit(&myargc, myargv);
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+        glutInitWindowSize(512, 512);
+        glutCreateWindow("RemoteRenderer");
+        glutShowWindow();
+        //        glutHideWindow();
+    }
 
-    glm::mat4 matP = glm::perspective(cameraAngle, (float) windowWidth / (float) windowHeight, 1.0f, 100.0f);
-    glm::mat4 matV = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    
-    glUniformMatrix4fv(shader->getProjectionMatrixUniform(), 1, false, glm::value_ptr(matP));
-    glUniformMatrix4fv(shader->getViewMatrixUniform(), 1, false, glm::value_ptr(matV));
-
-    printf("DRAW!\n");
-    printf("Scene pointer = %d\n", scene);
-    
-    if(scene != NULL) {
-        printf("Objects in scene:\n");
-        for(int i = 0; i < scene->getCubes()->size(); i++) {
-            vector<Cube> v = *(scene->getCubes());
-            Cube cube = v[i];
-            v[i].draw(shader);
+    void initGLEW() {
+        GLenum err = glewInit();
+        if (GLEW_OK != err) {
+            fprintf(stderr, "%s\n", glewGetErrorString(err));
+            exit(1);
         }
     }
-    printf("Scene drawn.\n");
-    //    glutSwapBuffers();
-}
 
+    void getViewportSize(int *width, int *height) {
+        GLint tmp[4];
+        glGetIntegerv(GL_VIEWPORT, tmp);
+        *width = tmp[2];
+        *height = tmp[3];
+    }
 
+    void readPixels(float* pixels, int &w, int &h) {
+        glReadPixels(0, 0, w, h, GL_RGB, GL_FLOAT, pixels);
+    }
 
-void getViewportSize(int *width, int *height)
-{
-    GLint tmp[4];
-    glGetIntegerv(GL_VIEWPORT, tmp);
-    *width = tmp[2];
-    *height = tmp[3];
-}
+    Image render(FILE *file) {
+//        initGLUT();
+//        initGLEW();
+//        glViewport(0, 0, windowWidth, windowHeight);
+        //
+        //        std::string v = "vertex.txt";
+        //        std::string f = "fragment.txt";
+        //        Shader *shader = new Shader(v, "", f);
+        //        glEnable(GL_DEPTH_TEST);
+        //
+        //        Scene *scene = NULL;
+        //        
+        //        scene = new Scene();
+        //        scene->setEyeX(1);
+        //        scene->setEyeY(1);
+        //        scene->setEyeZ(1);
+        //        scene->setLookAtX(0);
+        //        scene->setLookAtY(0);
+        //        scene->setLookAtZ(0);
+        //        
+        //        Cube *cube = new Cube(1.0f);
+        //        scene->addObject(cube);
 
-void readPixels(float* pixels, int &w, int &h)
-{
-    glReadPixels(0, 0, w, h, GL_RGB, GL_FLOAT, pixels);
-}
+        //        Reader reader(shader);
+        //        reader.loadFile(file);
+        //        if (reader.isValid()) {
+        //            printf("Reader is valid.");
+        //            scene = reader.getScene();
+        //        }
+        //        displayFrame(scene, shader);
+        //
+        int w = 512;
+        int h = 512;
+        getViewportSize(&w, &h);
 
-void saveImage(float* pixels, int width, int height)
-{
-    Mat image(width, height, CV_32FC3);
-    for (int x = 0; x < width; x++)
-    {
-        for (int y = 0; y < height; y++)
-        {
-            image.at<Vec3f > (width - x - 1, y)[0] = 255 * pixels[3 * (x * height + y) + 0];
-            image.at<Vec3f > (width - x - 1, y)[1] = 255 * pixels[3 * (x * height + y) + 1];
-            image.at<Vec3f > (width - x - 1, y)[2] = 255 * pixels[3 * (x * height + y) + 2];
+        //readPixels(pixels, w, h);
+
+        // tmp
+        w = 512;
+        h = 512;
+        float *pixels = new float[w * h * 3];
+        for (int i = 0; i < w * h * 3; i++) {
+            pixels[i] = 0.1f;
         }
+        Image im = Image(getImage(pixels, w, h), 95);
+        return im;
     }
-    imwrite("tmp.jpg", image);
-}
 
-Mat getImage(float* pixels, int width, int height)
-{
-    Mat image(width, height, CV_32FC3);
-    for (int x = 0; x < width; x++)
-    {
-        for (int y = 0; y < height; y++)
-        {
-            image.at<Vec3f > (width - x - 1, y)[0] = 255 * pixels[3 * (x * height + y) + 0];
-            image.at<Vec3f > (width - x - 1, y)[1] = 255 * pixels[3 * (x * height + y) + 1];
-            image.at<Vec3f > (width - x - 1, y)[2] = 255 * pixels[3 * (x * height + y) + 2];
-        }
+    Image renderImage(FILE* xml_file) {
+        return render(xml_file);
     }
-    return image;
-}
 
-
-void onChangeSize(int w, int h)
-{
-    glViewport(0, 0, w, h);
-}
-
-void initGLUT(int *argc, char** argv, int width, int height)
-{
-    glutInit(argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-
-    int windowPositionX = 100;
-    int windowPositionY = 100;
-    
-    glutInitWindowPosition(windowPositionX, windowPositionY);
-    glutInitWindowSize(width, height);
-    glutCreateWindow("RemoteRenderer");
-    glutHideWindow();
-
-//    glutReshapeFunc(onChangeSize);
-//    glutDisplayFunc(displayFrame);
-//    glutIdleFunc(onIdle);
-}
-
-void initGLEW()
-{
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
-    {
-        printf("%s\n", glewGetErrorString(err));
-        exit(1);
-    }
-}
-
-Shader *setupShaders()
-{
-    std::string v = "vertex.txt";
-    std::string f = "fragment.txt";
-    Shader *shader = new Shader(v, "", f);
-    return shader;
-}
-
-Shader *initOpenGL()
-{
-    Shader *shader = setupShaders();
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    return shader;
-}
-
-
-Shader *initRenderer()
-{
-    printf("Initializing renderer.\n");
-    int width = 512;
-    int height = 512;
-    
-    char *argv[]= {"Renderer"};
-    int argc=1;
-    initGLUT(&argc, argv, width, height);
-    initGLEW();
-    Shader *shader = initOpenGL();   
-    glViewport(0, 0, width, height);
-    return shader;
-}
-
-Scene *loadScene(FILE *xml, Shader *shader)
-{
-    Reader reader(shader);
-    reader.loadFile(xml);
-    Scene s;
-    if (reader.isValid()) {
-        s = reader.getScene();
-    } else {
-        s = Scene();
-    }   
-    return &s;
-}
-
-Image renderImage(Shader *shader, Scene *scene)
-{
-    displayFrame(shader, scene);
-    int w, h;
-    getViewportSize(&w, &h);
-    float *pixels = new float[w * h * 3];
-    readPixels(pixels, w, h);
-    int quality=95;
-    Mat img=getImage(pixels, w, h);
-    return Image(img,quality);
-}
-
+};
+#endif

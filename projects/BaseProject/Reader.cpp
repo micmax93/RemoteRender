@@ -23,10 +23,10 @@ void Reader::loadFile(const char *f) {
 void Reader::loadFile(FILE *f) {
     this->document = NULL;
 
- 		printf("Loading xml...\n");
+    printf("Loading xml...\n");
     this->document = new TiXmlDocument();    
     if (!document->LoadFile(f)) {
-    		printf("Couldn't load...\n");
+    	printf("Couldn't load...\n");
         document = NULL;
     }
     check();
@@ -180,8 +180,7 @@ void Reader::loadCube(TiXmlElement* e) {
     printf("Cube setup translation OK.\n");
     cube.rotate(rx, ry, rz, angle);
     printf("Cube setup rotation OK.\n");
-//    this->scene.addObject(cube);
-    this->scene.addCube(cube);
+    scene.addObject(&cube);
     printf("Cube added to scene OK.\n");
 }
 

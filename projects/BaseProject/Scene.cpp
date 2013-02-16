@@ -1,3 +1,9 @@
+/* 
+ * File:   Scene.cpp
+ * Author: deather
+ * 
+ * Created on February 10, 2013, 12:10 AM
+ */
 
 #include "Scene.h"
 
@@ -7,7 +13,9 @@ Scene::Scene() {
 Scene::~Scene() {
 }
 
-void Scene::addCube(Cube cube) {
-    this->cubes.push_back(cube);
+void Scene::addObject(Object *o) {
+    if (o != NULL) {
+        (this->objects).push_back(o);
+    }
 }
 
