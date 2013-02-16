@@ -9,7 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <cv.h>
 #include <highgui.h>
-#define TIXML_USE_STL
 #include <tinyxml.h>
 #include "Shader.h"
 #include "Object.h"
@@ -38,6 +37,57 @@ GLuint bufColors;
 GLuint bufNormals;
 
 Scene *scene;
+
+class Image
+{
+    bool valid;
+    vector<uchar> vbuf;
+    int file_size;
+    uchar *data;
+
+    public:
+    Image()
+    {
+        valid=false;
+    }
+    Image(Mat img,int quality=95)
+    {
+        vector<int> params;
+        params.push_back(CV_IMWRITE_JPEG_QUALITY);
+        params.push_back(quality);
+
+        valid=imencode(".jpg",img,vbuf,params);
+
+        file_size=vbuf.size();
+        data=vbuf.data();
+    }
+    ~Image()
+    {
+        vbuf.clear();
+    }
+
+    bool isValid()
+    {
+        return valid;
+    }
+
+    uchar *getDataPtr()
+    {
+        if(valid)
+        {
+            return data;
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
+    int size()
+    {
+        return file_size;
+    }
+};
 
 void onIdle() {
 }
@@ -142,6 +192,7 @@ void saveImage(float* pixels, int width, int height) {
             image.at<Vec3f > (width - x - 1, y)[2] = 255 * pixels[3 * (x * height + y) + 2];
         }
     }
+
     imwrite("tmp.jpg", image);
 }
 
@@ -192,93 +243,33 @@ void testXml() {
     }
 }
 
+int rendererMain(FILE *xml,Image &img) {
+    char *argv[]={"Renderer"};
+    int argc=1;
+    initGLUT(&argc, argv);
+    initGLEW();
+    initOpenGL();
+    glViewport(0, 0, windowWidth, windowHeight);
 
-
-class Image
-{
-    bool valid;
-    vector<uchar> vbuf;
-    int file_size;
-    uchar *data;
-
-    public:
-    Image(Mat img,int quality=95)
-    {
-        vector<int> params;
-        params.push_back(CV_IMWRITE_JPEG_QUALITY);
-        params.push_back(quality);
-
-        valid=imencode(".jpg",img,vbuf,params);
-
-        file_size=vbuf.size();
-        data=vbuf.data();
-    }
-    ~Image()
-    {
-        vbuf.clear();
+    Reader reader(shader);
+    reader.loadFile("scene.xml");
+    if (reader.isValid()) {
+        scene = reader.getScene();
     }
 
-    bool isValid()
-    {
-        return valid;
-    }
+    //    glutMainLoop();
+    displayFrame();
 
-    uchar *getDataPtr()
-    {
-        if(valid)
-        {
-            return data;
-        }
-        else
-        {
-            return NULL;
-        }
-    }
+    int w, h;
+    getViewportSize(&w, &h);
+    float *pixels = new float[w * h * 3];
+    readPixels(pixels, w, h);
+    img=Image(getImage(pixels, w, h),100);
 
-    int size()
-    {
-        return file_size;
-    }
-};
+    //    testXml();
 
-namespace renderer
-{
-    void initRenderer()
-    {
-        char *argv[]={"Renderer"};
-        int argc=1;
-        initGLUT(&argc, argv);
-        initGLEW();
-        initOpenGL();
-        glViewport(0, 0, windowWidth, windowHeight);
-    }
-
-    void loadScene(FILE *xml)
-    {
-        Reader reader(shader);
-        reader.loadFile(xml);
-        if (reader.isValid()) {
-            scene = reader.getScene();
-        }
-    }
-
-    Image renderImage()
-    {
-        displayFrame();
-
-        int w, h;
-        getViewportSize(&w, &h);
-        float *pixels = new float[w * h * 3];
-        readPixels(pixels, w, h);
-        int quality=95;
-        Mat img=getImage(pixels, w, h);
-        return Image(img,quality);
-    }
-
-    void cleanRenderer()
-    {
-        freeVAO();
-        freeVBO();
-        cleanShaders();
-    }
+    freeVAO();
+    freeVBO();
+    cleanShaders();
+    return 0;
 }

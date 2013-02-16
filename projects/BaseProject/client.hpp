@@ -48,12 +48,8 @@ namespace client
         printf("xml downloaded\n");
 
         FILE *xml_file=xml_data;
-
-
-        renderer::initRenderer();
-        renderer::loadScene(xml_file);
-        Image img=renderer::renderImage();
-        renderer::cleanRenderer();
+        Image img;
+        rendererMain(xml_file,img);
 
 
         int jpg_size=img.size();
