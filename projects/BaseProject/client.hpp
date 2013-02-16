@@ -2,6 +2,8 @@
 #define CLIENT_HPP_INCLUDED
 #include <cv.h>
 #include <highgui.h>
+#include "Shader.h"
+#include "Scene.h"
 using namespace std;
 using namespace cv;
 
@@ -54,10 +56,9 @@ namespace client
 //        renderer::loadScene(xml_file);
 //        Image img=renderer::renderImage();
 //        renderer::cleanRenderer();
-        initRenderer();
-        loadScene(xml_file);
-        Image img=renderImage();
-        cleanRenderer();
+        Shader *shader = initRenderer();
+        Scene *scene = loadScene(xml_file, shader);
+        Image img=renderImage(shader, scene);
 
 
         int jpg_size=img.size();
@@ -65,11 +66,9 @@ namespace client
         writeNetInt(klient,&jpg_size);
         printf("jpg, size= %i\n",jpg_size);
 
-
         int chksum=0;
         readNetInt(klient,&chksum);
         printf("checksum= %i\n",chksum);
-
 
         int jpg_buf_count=ceil((float)jpg_size/(float)buf_size);
         if(chksum!=jpg_buf_count)
@@ -77,7 +76,6 @@ namespace client
             printf("checksum FAIL, expected= %i\n",jpg_buf_count);
             return false;
         }
-
 
         BufferedFileSender bf(jpg_data,jpg_size,buf_size);
         bf.sendTo(klient);

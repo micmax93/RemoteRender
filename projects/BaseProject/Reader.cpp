@@ -8,7 +8,6 @@ Reader::Reader(Shader *shader) {
 
 void Reader::loadFile(const char *f) {
     this->document = NULL;
-    this->scene = NULL;
 
     this->document = new TiXmlDocument();
     if (!document->LoadFile(f)) {
@@ -17,14 +16,12 @@ void Reader::loadFile(const char *f) {
     check();
 
     if (valid) {
-        scene = new Scene();
         read();
     }
 }
 
 void Reader::loadFile(FILE *f) {
     this->document = NULL;
-    this->scene = NULL;
 
  		printf("Loading xml...\n");
     this->document = new TiXmlDocument();    
@@ -35,7 +32,7 @@ void Reader::loadFile(FILE *f) {
     check();
 
     if (valid) {
-        scene = new Scene();
+        scene = Scene();
         read();
     }
 }
@@ -97,12 +94,12 @@ void Reader::read() {
     ly = atof(document->FirstChildElement("scene")->FirstChildElement("camera")->FirstChildElement("lookAt")->FirstChildElement("y")->FirstChild()->Value());
     lz = atof(document->FirstChildElement("scene")->FirstChildElement("camera")->FirstChildElement("lookAt")->FirstChildElement("z")->FirstChild()->Value());
     
-    this->scene->setEyeX(ex);
-    this->scene->setEyeY(ey);
-    this->scene->setEyeZ(ez);
-    this->scene->setLookAtX(lx);
-    this->scene->setLookAtY(ly);
-    this->scene->setLookAtZ(lz);
+    this->scene.setEyeX(ex);
+    this->scene.setEyeY(ey);
+    this->scene.setEyeZ(ez);
+    this->scene.setLookAtX(lx);
+    this->scene.setLookAtY(ly);
+    this->scene.setLookAtZ(lz);
     
     printf("Setting camera: %f %f %f, %f %f %f\n", ex, ey, ez, lx, ly, lz);
 
@@ -123,8 +120,8 @@ void Reader::loadCube(TiXmlElement* e) {
     float x, y, z;
     float rx, ry, rz, angle;
 
-    TiXmlElement *location = e->FirstChildElement("location");
-    TiXmlElement *rotation = e->FirstChildElement("rotation");
+//    TiXmlElement *location = e->FirstChildElement("location");
+//    TiXmlElement *rotation = e->FirstChildElement("rotation");
     if (e->FirstChildElement("size") && e->FirstChildElement("size")->FirstChild()) {
         size = atof(e->FirstChildElement("size")->FirstChild()->Value());
         if (size <= 0.0f) {
@@ -173,17 +170,18 @@ void Reader::loadCube(TiXmlElement* e) {
     }
     printf("Rotation: %f %f %f %f\n", rx, ry, rz, angle);
 
-    Cube *cube = new Cube(size);
+    Cube cube(size);
     printf("Cube constructor OK.\n");
-    cube->createBuffers();
+    cube.createBuffers();
     printf("Cube create buffers OK.\n");
-    cube->setupVao(shader);
+    cube.setupVao(shader);
     printf("Cube setup vao OK.\n");
-    cube->translate(x, y, z);
+    cube.translate(x, y, z);
     printf("Cube setup translation OK.\n");
-    cube->rotate(rx, ry, rz, angle);
+    cube.rotate(rx, ry, rz, angle);
     printf("Cube setup rotation OK.\n");
-    this->scene->addObject(cube);
+//    this->scene.addObject(cube);
+    this->scene.addCube(cube);
     printf("Cube added to scene OK.\n");
 }
 
@@ -193,6 +191,5 @@ void Reader::loadSphere(TiXmlElement* e) {
 
 Reader::~Reader() {
     delete document;
-    delete scene;
 }
 

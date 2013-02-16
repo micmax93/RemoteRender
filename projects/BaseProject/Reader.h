@@ -17,7 +17,7 @@ public:
         return valid;
     }
 
-    Scene *getScene() {
+    Scene getScene() {
         return scene;
     }
 private:
@@ -27,7 +27,7 @@ private:
     void loadSphere(TiXmlElement *e);
     bool valid;
     TiXmlDocument *document;
-    Scene *scene;
+    Scene scene;
     Shader *shader;
 };
 
