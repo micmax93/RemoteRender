@@ -6,25 +6,12 @@
 #include "connectivity.hpp"
 #include "utilities.hpp"
 #include "server.hpp"
+#include "renderer.hpp"
+#include "Reader.h"
 #include "client.hpp"
 using namespace std;
 
-void new_client(Connection klient)
-{
-    char msg;
-    read(klient,&msg,sizeof(msg));
-    if(msg==protocol::GET_HOST_PID)
-    {
-        int pid=getppid();
-        write(klient,&pid,sizeof(pid));
-    }
-    else if(msg==protocol::NEW_CLIENT_REQ)
-    {
-        BufferedFileSender bf("foto.jpg");
-        bf.sendTo(klient);
-    }
-    klient.disconnect();
-}
+int debug_mode=TRUE;
 
 int main(int argc, char **argv)
 {
@@ -42,19 +29,12 @@ int main(int argc, char **argv)
         if(!fork())
         {
             server::initConection(port);
-            server::mainLoop(new_client);
+            server::mainLoop(client::new_connection);
         }
     }
     else if(cmd=="stop")
     {
-        Connection conn;
-        conn.initByAddr(Addr("localhost",port));
-
-        char msg=protocol::GET_HOST_PID;
-        write(conn,&msg,sizeof(msg));
-
-        int pid;
-        read(conn,&pid,sizeof(pid));
+        int pid=server::getServerPid(port);
         kill(pid,SIGTERM);
     }
     else
