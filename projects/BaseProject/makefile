@@ -11,14 +11,14 @@ AR = ar
 LD = g++
 WINDRES = windres
 
-INC = 
+INC =  -I/usr/include/opencv
 CFLAGS =  -Wall -fexceptions
 RESINC = 
 LIBDIR = 
-LIB = 
-LDFLAGS = 
+LIB =  -lGL -lglut -ltinyxml
+LDFLAGS =  `pkg-config --libs glew` `pkg-config --libs opencv`
 
-INC_DEBUG =  $(INC)
+INC_DEBUG =  $(INC) -I/usr/include/opencv
 CFLAGS_DEBUG =  $(CFLAGS) -g
 RESINC_DEBUG =  $(RESINC)
 RCFLAGS_DEBUG =  $(RCFLAGS)
@@ -29,13 +29,13 @@ OBJDIR_DEBUG = obj/Debug
 DEP_DEBUG = 
 OUT_DEBUG = bin/Debug/threads
 
-INC_RELEASE =  $(INC)
+INC_RELEASE =  $(INC) -I/usr/include/opencv
 CFLAGS_RELEASE =  $(CFLAGS) -O2
 RESINC_RELEASE =  $(RESINC)
 RCFLAGS_RELEASE =  $(RCFLAGS)
 LIBDIR_RELEASE =  $(LIBDIR)
-LIB_RELEASE = $(LIB)
-LDFLAGS_RELEASE =  $(LDFLAGS) -s
+LIB_RELEASE = $(LIB) -lGL -lglut -ltinyxml
+LDFLAGS_RELEASE =  $(LDFLAGS) -s `pkg-config --libs glew` `pkg-config --libs opencv`
 OBJDIR_RELEASE = obj/Release
 DEP_RELEASE = 
 OUT_RELEASE = bin/Release/threads
