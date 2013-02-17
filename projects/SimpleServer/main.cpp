@@ -7,42 +7,16 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
-#include <time.h> 
+#include <time.h>
 #include <math.h>
+#include "connectivity.hpp"
 #include "Renderer.h"
 
 namespace constants {
     const int bufferSize = 512;
 };
 
-void writeInt(int fd, int value) {
-    int tmp = htonl(value);
-    write(fd, &tmp, sizeof (value));
-}
 
-void writeChar(int fd, char value) {
-    write(fd, &value, sizeof (value));
-}
-
-int readInt(int fd, int def = -1) {
-    int tmp;
-    int n = read(fd, &tmp, sizeof (int));
-    if (n <= 0) {
-        return def;
-    } else {
-        return ntohl(tmp);
-    }
-}
-
-int readChar(int fd, char def = ' ') {
-    char tmp;
-    int n = read(fd, &tmp, sizeof (int));
-    if (n <= 0) {
-        return def;
-    } else {
-        return tmp;
-    }
-}
 
 void copyArrays(char *dst, char *src, int count, int offset) {
     dst = dst + offset;
@@ -181,27 +155,15 @@ int main(int argc, char *argv[]) {
     }
 
     int port = atoi(argv[1]);
-    int listenfd = 0;
-    int connfd = 0;
-    struct sockaddr_in serv_addr;
-
     char sendBuff[1025];
-    time_t ticks;
-
-    listenfd = socket(AF_INET, SOCK_STREAM, 0);
-    memset(&serv_addr, '0', sizeof (serv_addr));
     memset(sendBuff, '0', sizeof (sendBuff));
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    serv_addr.sin_port = htons(port);
-
-    bind(listenfd, (struct sockaddr*) &serv_addr, sizeof (serv_addr));
-
-    listen(listenfd, 10);
+    Addr addr;
+    addr.initHost(port);
+    Host host;
+    host.initByAddr(addr);
 
     while (1) {
-        connfd = accept(listenfd, (struct sockaddr*) NULL, NULL);
+        Connection connfd = host.waitForClient();
 
         int pid = fork();
         if (pid == 0) {
