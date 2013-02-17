@@ -139,16 +139,28 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    int port = atoi(argv[1]);
+        int port = atoi(argv[1]);
+    int listenfd = 0;
+    int connfd = 0;
+    struct sockaddr_in serv_addr;
+
     char sendBuff[1025];
+    time_t ticks;
+
+    listenfd = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&serv_addr, '0', sizeof (serv_addr));
     memset(sendBuff, '0', sizeof (sendBuff));
-    Addr addr;
-    addr.initHost(port);
-    Host host;
-    host.initByAddr(addr);
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serv_addr.sin_port = htons(port);
+
+    bind(listenfd, (struct sockaddr*) &serv_addr, sizeof (serv_addr));
+
+    listen(listenfd, 10);
 
     while (1) {
-        Connection connfd = host.waitForClient();
+        connfd = accept(listenfd, (struct sockaddr*) NULL, NULL);
 
         int pid = fork();
         if (pid == 0) {
