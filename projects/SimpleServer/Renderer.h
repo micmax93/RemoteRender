@@ -22,6 +22,58 @@
 using namespace std;
 using namespace cv;
 
+class Image
+{
+    bool valid;
+    vector<uchar> vbuf;
+    int file_size;
+    uchar *data;
+
+    public:
+    Image()
+    {
+        valid=false;
+    }
+    Image(Mat img,int quality=95)
+    {
+        vector<int> params;
+        params.push_back(CV_IMWRITE_JPEG_QUALITY);
+        params.push_back(quality);
+
+        valid=imencode(".jpg",img,vbuf,params);
+
+        file_size=vbuf.size();
+        data=vbuf.data();
+    }
+    ~Image()
+    {
+        vbuf.clear();
+    }
+
+    bool isValid()
+    {
+        return valid;
+    }
+
+    uchar *getDataPtr()
+    {
+        if(valid)
+        {
+            return data;
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
+    int size()
+    {
+        return file_size;
+    }
+};
+
+
 void displayFrame(Shader *shader, Scene *scene, int windowWidth, int windowHeight) {
     float cameraAngle = 45.0f;
 
@@ -116,7 +168,19 @@ void saveImage(const char* fileName, float* pixels, int width, int height, int q
     imwrite(fileName, image);
 }
 
-void render(const char *xmlFileName, const char *imgFileName) {
+Mat getImage(float* pixels, int width, int height, int quality) {
+    Mat image(width, height, CV_32FC3);
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            image.at<Vec3f > (width - x - 1, y)[0] = 255 * pixels[3 * (x * height + y) + 0];
+            image.at<Vec3f > (width - x - 1, y)[1] = 255 * pixels[3 * (x * height + y) + 1];
+            image.at<Vec3f > (width - x - 1, y)[2] = 255 * pixels[3 * (x * height + y) + 2];
+        }
+    }
+    return image;
+}
+
+void render(FILE *xmlFileName, FILE **img_file) {
     int argc = 1;
     const char* argv[] = {"renderer"};
 
@@ -151,7 +215,18 @@ void render(const char *xmlFileName, const char *imgFileName) {
     printf("%d x %d\n", w, h);
     float *pixels = new float[w * h * 3];
     readPixels(pixels, w, h);
-    saveImage(imgFileName, pixels, w, h, scene->getQuality());
+    Image img(getImage(pixels, w, h, scene->getQuality()));
+    if(img.isValid())
+    {
+        FILE *f=tmpfile();
+        fwrite(img.getDataPtr(), img.size(), sizeof (uchar), f);
+        fseek(f, 0, SEEK_SET);
+        *img_file=f;
+    }
+    else
+    {
+        *img_file=NULL;
+    }
 }
 
 #endif

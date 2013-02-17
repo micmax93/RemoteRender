@@ -27,25 +27,25 @@ void copyArrays(char *dst, char *src, int count, int offset) {
     }
 }
 
-bool saveToFile(const char *filename, char *data, int size) {
-    printf("Saving to file %s\n", filename);
+bool saveToFile(FILE **file, char *data, int size) {
+    printf("Saving to file\n");
 
-    FILE *f = fopen(filename, "w");
+    FILE *f = tmpfile();
     if (f != NULL) {
         fwrite(data, size, sizeof (char), f);
-        fclose(f);
+        fseek(f, 0, SEEK_SET);
+        *file=f;
         return true;
     }
     return false;
 }
 
-bool sendFile(int fd, const char* filename) {
-    FILE *f = fopen(filename, "r");
+bool sendFile(int fd, FILE *f) {
     if (f == NULL) {
         return false;
     }
 
-    printf("Sending file %s\n", filename);
+    printf("Sending file\n");
     fseek(f, 0, SEEK_END);
     int fileSize = ftell(f);
     rewind(f);
@@ -64,7 +64,6 @@ bool sendFile(int fd, const char* filename) {
         write(fd, buffer, n);
         printf("%d bytes ", n);
     }
-    fclose(f);
 
     printf("\n");
     return true;
@@ -120,29 +119,15 @@ void handleClient(int fd) {
     }
 
     printf("Read done.\n");
-    char xmlFileName[65];
-    char imageFileName[65];
 
-    genRandom((char*) xmlFileName, 60);
-    genRandom((char*) imageFileName, 60);
-    xmlFileName[60] = '.';
-    xmlFileName[61] = 'x';
-    xmlFileName[62] = 'm';
-    xmlFileName[63] = 'l';
-    xmlFileName[64] = '\0';
+    FILE *xml_file,*img_file;
+    Image img;
+    saveToFile(&xml_file, data, xmlSize);
+    render(xml_file, &img_file);
+    sendFile(fd, img_file);
 
-    imageFileName[60] = '.';
-    imageFileName[61] = 'j';
-    imageFileName[62] = 'p';
-    imageFileName[63] = 'g';
-    imageFileName[64] = '\0';
-
-    saveToFile(xmlFileName, data, xmlSize);
-    render(xmlFileName, imageFileName);
-    sendFile(fd, (char*) imageFileName);
-
-    unlink((char*) xmlFileName);
-    unlink((char*) imageFileName);
+    fclose(xml_file);
+    fclose(img_file);
 
     close(fd);
     return;

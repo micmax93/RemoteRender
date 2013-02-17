@@ -12,6 +12,7 @@ public:
     Reader(Shader *shader);
     virtual ~Reader();
     void loadFile(const char *file);
+    void loadFile(FILE *f);
 
     bool isValid() {
         return valid;

@@ -23,6 +23,24 @@ void Reader::loadFile(const char *f) {
     }
 }
 
+
+
+void Reader::loadFile(FILE *f) {
+    this->document = NULL;
+    this->scene = NULL;
+
+    this->document = new TiXmlDocument();
+    if (!document->LoadFile(f)) {
+        document = NULL;
+    }
+    check();
+
+    if (valid) {
+        scene = new Scene();
+        read();
+    }
+}
+
 void Reader::check() {
     if (document == NULL) {
         std::cout << "No document." << std::endl;
