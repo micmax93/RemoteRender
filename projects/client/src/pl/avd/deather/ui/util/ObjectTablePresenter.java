@@ -8,7 +8,7 @@ public class ObjectTablePresenter {
         o.getBaseName(),
         o.getPosition().toString(),
         o.getRotation().toString(),
-        o.getColor()
+//        o.getColor()
     };
 
     return tmp;

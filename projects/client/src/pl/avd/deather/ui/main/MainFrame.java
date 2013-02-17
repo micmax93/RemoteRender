@@ -119,7 +119,7 @@ public class MainFrame extends JFrame implements MouseListener {
   }
 
   private void createTable() {
-    table = new JTable(new DefaultTableModel(new Object[]{"Type", "Position", "Rotation", "Color"}, 0) {
+    table = new JTable(new DefaultTableModel(new Object[]{"Object", "Position", "Rotation"}, 0) {
       @Override
       public boolean isCellEditable(int row, int column) {
         return false;
