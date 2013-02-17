@@ -115,7 +115,7 @@ void saveImage(const char* fileName, float* pixels, int width, int height, int q
     vector<int> params;
     params.push_back(CV_IMWRITE_JPEG_QUALITY);
     params.push_back(quality);
-    imwrite(fileName, image);
+    imwrite(fileName, image, params);
 }
 
 void render(const char *xmlFileName, const char *imgFileName) {
