@@ -25,7 +25,7 @@ public class Cube extends BaseObject {
 
   @Override
   public String getBaseName() {
-    return "Cube";
+    return "Cube " + edge;
   }
 
   @Override

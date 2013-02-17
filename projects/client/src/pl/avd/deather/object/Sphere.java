@@ -25,7 +25,7 @@ public class Sphere extends BaseObject {
 
   @Override
   public String getBaseName() {
-    return "Sphere";
+    return "Sphere " + radius;
   }
 
   @Override

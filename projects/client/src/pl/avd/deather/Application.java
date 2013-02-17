@@ -16,7 +16,6 @@ import pl.avd.deather.ui.main.MainFrame;
 import pl.avd.deather.xml.XmlHelper;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,8 +25,6 @@ public class Application {
 
   private MainFrame frame;
   private ObjectStorage storage;
-  private String host = "micmax93.pl";
-  private int port = 55555;
 
   public Application() {
 
@@ -70,8 +67,15 @@ public class Application {
               Vector3<Float> lookAt = frame.getCameraLookAt();
 
               XmlHelper xml = new XmlHelper();
-              String xmlText = xml.createXml(eye, lookAt, storage, frame.getImageWidth(), frame.getImageHeight(),frame.getQuality());
+              String xmlText = xml.createXml(eye, lookAt, storage, frame.getImageWidth(), frame.getImageHeight(), frame.getQuality());
               System.out.println(xmlText);
+
+              String host = frame.getHost();
+              int port = frame.getPort();
+
+              if (host.isEmpty() || port <= 0) {
+                throw new Exception("Not a valid server.");
+              }
 
               RenderSocket socket = new RenderSocket(host, port);
               socket.sendXml(xmlText);

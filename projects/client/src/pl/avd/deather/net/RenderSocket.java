@@ -64,7 +64,7 @@ public class RenderSocket {
       writeInt(data.length);
       System.out.println("Sent " + data.length);
       int checkSum = readInt();
-      System.out.println("Read checksum " + checkSum + ", expected = " + checkSum);
+      System.out.println("Read checksum " + checkSum + ", expected = " + expectedCheckSum);
 
       if (checkSum != expectedCheckSum) {
         throw new InterruptException("Received checksum is different.");

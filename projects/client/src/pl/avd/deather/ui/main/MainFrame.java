@@ -25,6 +25,9 @@ public class MainFrame extends JFrame implements MouseListener {
   JPanel cameraPanel;
   JPanel buttonsPanel;
 
+  JTextField server;
+  JTextField port;
+
   private JTable table;
   private JButton infoButton;
   private JButton removeButton;
@@ -38,8 +41,8 @@ public class MainFrame extends JFrame implements MouseListener {
   private ObjectRemoveHandler removeHandler;
   private ObjectTablePresenter presenter;
 
-  private JComboBox<Integer> widthComboBox;
-  private JComboBox<Integer> heightComboBox;
+  private JComboBox widthComboBox;
+  private JComboBox heightComboBox;
   private JSlider eyeSliderX;
   private JSlider eyeSliderY;
   private JSlider eyeSliderZ;
@@ -57,8 +60,8 @@ public class MainFrame extends JFrame implements MouseListener {
     setTitle(title);
     setContentPane(mainPanel);
 
-    mainPanel.setPreferredSize(new Dimension(800, 600));
-    setMinimumSize(new Dimension(800, 600));
+    mainPanel.setPreferredSize(new Dimension(800, 700));
+    setMinimumSize(new Dimension(800, 700));
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     pack();
 
@@ -97,15 +100,20 @@ public class MainFrame extends JFrame implements MouseListener {
   }
 
   private void createButtons() {
+    server = new JTextField("127.0.0.1", 16);
+    port = new JTextField("33666", 6);
+
     drawButton = new JButton("Request draw");
     infoButton = new JButton("Show info");
     newButton = new JButton("Create new");
     removeButton = new JButton("Remove");
 
+    buttonsPanel.add(server);
+    buttonsPanel.add(port);
     buttonsPanel.add(drawButton);
     buttonsPanel.add(newButton);
     buttonsPanel.add(removeButton);
-    buttonsPanel.add(infoButton);
+//    buttonsPanel.add(infoButton);
 
     addDrawClickHandler(null);
   }
@@ -127,8 +135,8 @@ public class MainFrame extends JFrame implements MouseListener {
     Dimension d2 = new Dimension(0, 5);
 
     qualitySlider = createCameraSlider("Quality", 500, 1000, 100, 50);
-    widthComboBox = new JComboBox<Integer>(new Integer[]{128, 256, 512, 1024});
-    heightComboBox = new JComboBox<Integer>(new Integer[]{128, 256, 512, 1024});
+    widthComboBox = new JComboBox(new Integer[]{128, 256, 512});
+    heightComboBox = new JComboBox(new Integer[]{128, 256, 512});
 
     JPanel sizePanel = new JPanel();
     sizePanel.setLayout(new BoxLayout(sizePanel, BoxLayout.Y_AXIS));
@@ -148,6 +156,12 @@ public class MainFrame extends JFrame implements MouseListener {
     lookAtSliderY = createCameraSlider("Look At Y", -100, 100, 50, 10);
     lookAtSliderZ = createCameraSlider("Look At Z", -100, 100, 50, 10);
 
+    eyeSliderX.setValue(-25);
+    eyeSliderY.setValue(-25);
+    eyeSliderZ.setValue(-25);
+    lookAtSliderX.setValue(0);
+    lookAtSliderY.setValue(0);
+    lookAtSliderZ.setValue(0);
 
     cameraPanel.add(eyeSliderX);
     cameraPanel.add(new Box.Filler(d, d, d));
@@ -292,5 +306,13 @@ public class MainFrame extends JFrame implements MouseListener {
 
   public int getQuality() {
     return (int) (qualitySlider.getValue() / 10f);
+  }
+
+  public int getPort() {
+    return Integer.valueOf(port.getText());
+  }
+
+  public String getHost() {
+    return server.getText();
   }
 }

@@ -19,7 +19,7 @@ public class SphereDialog extends JDialog {
   private JTextField yPos;
   private JTextField zPos;
   private JTextField radius;
-  private JComboBox<String> colorComboBox;
+  private JComboBox colorComboBox;
   private SphereDialogOkHandler handler;
 
   private Dimension dim = new Dimension(250, 300);
@@ -62,10 +62,10 @@ public class SphereDialog extends JDialog {
     JPanel cubePanel = new JPanel();
     cubePanel.setBorder(BorderFactory.createTitledBorder("Sphere radius and color"));
     cubePanel.setLayout(new BoxLayout(cubePanel, BoxLayout.X_AXIS));
-    radius = new JFormattedTextField(0.0f);
-    colorComboBox = new JComboBox<String>(new String[]{"red", "blue"});
+    radius = new JTextField("0.25");
+    colorComboBox = new JComboBox(new String[]{"red", "blue"});
     cubePanel.add(radius);
-    cubePanel.add(colorComboBox);
+//    cubePanel.add(colorComboBox);
     mainPanel.add(cubePanel);
     cubePanel.setMaximumSize(subDim);
 
@@ -74,9 +74,9 @@ public class SphereDialog extends JDialog {
     JPanel positionPanel = new JPanel();
     positionPanel.setBorder(BorderFactory.createTitledBorder("Position"));
     positionPanel.setLayout(new BoxLayout(positionPanel, BoxLayout.X_AXIS));
-    xPos = new JFormattedTextField(0.0f);
-    yPos = new JFormattedTextField(0.0f);
-    zPos = new JFormattedTextField(0.0f);
+    xPos = new JTextField("0.0");
+    yPos = new JTextField("0.0");
+    zPos = new JTextField("0.0");
     positionPanel.add(xPos);
     positionPanel.add(yPos);
     positionPanel.add(zPos);
@@ -88,10 +88,10 @@ public class SphereDialog extends JDialog {
     JPanel rotationPanel = new JPanel();
     rotationPanel.setBorder(BorderFactory.createTitledBorder("Rotation XYZ alpha"));
     rotationPanel.setLayout(new BoxLayout(rotationPanel, BoxLayout.X_AXIS));
-    xRot = new JFormattedTextField(0.0f);
-    yRot = new JFormattedTextField(0.0f);
-    zRot = new JFormattedTextField(0.0f);
-    angleRot = new JFormattedTextField(0.0f);
+    xRot = new JTextField("0.0");
+    yRot = new JTextField("0.0");
+    zRot = new JTextField("0.0");
+    angleRot = new JTextField("30.0");
     rotationPanel.add(xRot);
     rotationPanel.add(yRot);
     rotationPanel.add(zRot);
