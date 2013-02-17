@@ -1,0 +1,8 @@
+#version 330
+
+out vec4 pixelColor;
+in vec4 color_out;
+
+void main(void) {
+	pixelColor=vec4(color_out.xyz,1);
+}

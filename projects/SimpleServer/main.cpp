@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <time.h> 
 #include <math.h>
+#include "Renderer.h"
 
 namespace constants {
     const int bufferSize = 512;
@@ -52,15 +53,16 @@ void copyArrays(char *dst, char *src, int count, int offset) {
     }
 }
 
-FILE* saveToTmpFile(char *data, int size) {
-    printf("Saving to tmp file.\n");
+bool saveToFile(const char *filename, char *data, int size) {
+    printf("Saving to file %s\n", filename);
 
-    //FILE *file = tmpfile();
-    FILE *f = fopen("test.xml", "w");
+    FILE *f = fopen(filename, "w");
     if (f != NULL) {
         fwrite(data, size, sizeof (char), f);
+        fclose(f);
+        return true;
     }
-    return f;
+    return false;
 }
 
 bool sendFile(int fd, const char* filename) {
@@ -69,11 +71,12 @@ bool sendFile(int fd, const char* filename) {
         return false;
     }
 
+    printf("Sending file %s\n", filename);
     fseek(f, 0, SEEK_END);
     int fileSize = ftell(f);
     rewind(f);
     printf("File size = %d\n", fileSize);
-    
+
     writeInt(fd, fileSize);
     int checkSum = readInt(fd);
     if (checkSum != (int) ceil((double) fileSize / (double) constants::bufferSize)) {
@@ -88,8 +91,22 @@ bool sendFile(int fd, const char* filename) {
         printf("%d bytes ", n);
     }
     fclose(f);
+
     printf("\n");
     return true;
+}
+
+void genRandom(char *s, const int len) {
+    static const char alphanum[] =
+            "0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof (alphanum) - 1)];
+    }
+
+    s[len] = 0;
 }
 
 void handleClient(int fd) {
@@ -129,10 +146,29 @@ void handleClient(int fd) {
     }
 
     printf("Read done.\n");
-    FILE *file = saveToTmpFile(data, xmlSize);
-    fclose(file);
+    char xmlFileName[65];
+    char imageFileName[65];
 
-    sendFile(fd, "test.jpg");
+    genRandom((char*) xmlFileName, 60);
+    genRandom((char*) imageFileName, 60);
+    xmlFileName[60] = '.';
+    xmlFileName[61] = 'x';
+    xmlFileName[62] = 'm';
+    xmlFileName[63] = 'l';
+    xmlFileName[64] = '\0';
+
+    imageFileName[60] = '.';
+    imageFileName[61] = 'j';
+    imageFileName[62] = 'p';
+    imageFileName[63] = 'g';
+    imageFileName[64] = '\0';
+
+    saveToFile(xmlFileName, data, xmlSize);
+    render(xmlFileName, imageFileName);
+    sendFile(fd, (char*) imageFileName);
+
+    unlink((char*) xmlFileName);
+    unlink((char*) imageFileName);
 
     close(fd);
     return;
@@ -175,7 +211,6 @@ int main(int argc, char *argv[]) {
             return 0;
         } else {
             printf("I am parent.");
-            return 0;
         }
     }
 }
