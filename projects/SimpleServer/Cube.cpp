@@ -25,7 +25,7 @@ void Cube::createArrays() {
     //    EF
     //    GH
 
-    v = new float[72]{
+    float q1[] = {
         //        -x, x, x, // A
         //        x, x, x, // B
         //        -x, -x, x, // C
@@ -66,8 +66,13 @@ void Cube::createArrays() {
         -x, -x, x, // C
         x, -x, x, // D     
     };
+    v = new float[72];
+    for (int i = 0; i < 72; i++) {
+        v[i] = q1[i];
+    }
 
-    c = new float[72]{
+
+    float q2[] = {
         1.0, 0.0, 0.0,
         1.0, 0.0, 0.0,
         1.0, 0.0, 0.0,
@@ -98,8 +103,14 @@ void Cube::createArrays() {
         0.0, 1.0, 1.0,
         0.0, 1.0, 1.0,
     };
+    c = new float[72];
+    for (int i = 0; i < 72; i++) {
+        c[i] = q2[i];
+    }
+    //    c = b;
 
-    n = new float[72]{
+
+    float q3[] = {
         0, 1, 0,
         0, 1, 0,
         0, 1, 0,
@@ -130,6 +141,11 @@ void Cube::createArrays() {
         0, -1, 0,
         0, -1, 0,
     };
+    n = new float[72];
+    for (int i = 0; i < 72; i++) {
+        n[i] = q1[i];
+    }
+    //    n = d;
 
     count = 36;
     GLuint tmp[] = {0, 1, 2, 0, 2, 3,};
@@ -161,12 +177,12 @@ void Cube::createBuffers() {
     glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
     glBufferData(GL_ARRAY_BUFFER, size, n, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0);
 
     glGenBuffers(1, &indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 36 * sizeof (GLuint), indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint) 0);
 }
 
 void Cube::draw(Shader *shader) {

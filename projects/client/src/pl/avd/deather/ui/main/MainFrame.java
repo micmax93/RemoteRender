@@ -135,16 +135,16 @@ public class MainFrame extends JFrame implements MouseListener {
     Dimension d2 = new Dimension(0, 5);
 
     qualitySlider = createCameraSlider("Quality", 500, 1000, 100, 50);
-    widthComboBox = new JComboBox(new Integer[]{128, 256, 512});
-    heightComboBox = new JComboBox(new Integer[]{128, 256, 512});
+    widthComboBox = new JComboBox(new String[]{"128 x 128", "256 x 256", "512 x 512"});
+//    heightComboBox = new JComboBox(new Integer[]{128, 256, 512});
 
     JPanel sizePanel = new JPanel();
     sizePanel.setLayout(new BoxLayout(sizePanel, BoxLayout.Y_AXIS));
     sizePanel.setBorder(BorderFactory.createTitledBorder("Image width/height"));
     sizePanel.add(widthComboBox);
-    sizePanel.add(new Box.Filler(d2, d2, d2));
-    sizePanel.add(heightComboBox);
-    sizePanel.setMaximumSize(new Dimension(250, 80));
+//    sizePanel.add(new Box.Filler(d2, d2, d2));
+//    sizePanel.add(heightComboBox);
+    sizePanel.setMaximumSize(new Dimension(250, 50));
 
     cameraPanel.add(qualitySlider);
     cameraPanel.add(sizePanel);
@@ -297,11 +297,13 @@ public class MainFrame extends JFrame implements MouseListener {
   }
 
   public int getImageWidth() {
-    return (Integer) widthComboBox.getSelectedItem();
+    String x = (String) widthComboBox.getSelectedItem();
+    return Integer.valueOf(x.substring(0, 3));
   }
 
   public int getImageHeight() {
-    return (Integer) heightComboBox.getSelectedItem();
+    String x = (String) widthComboBox.getSelectedItem();
+    return Integer.valueOf(x.substring(0, 3));
   }
 
   public int getQuality() {
