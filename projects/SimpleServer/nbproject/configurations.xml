@@ -48,6 +48,7 @@
       </toolsSet>
       <compileType>
         <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/rrserver</output>
           <linkerLibItems>
             <linkerOptionItem>`pkg-config --libs opencv`</linkerOptionItem>
             <linkerOptionItem>`pkg-config --libs gl`</linkerOptionItem>
